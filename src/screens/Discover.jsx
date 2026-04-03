@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { RECIPES } from '../data/recipes';
+import { DISCOVER_RECIPES } from '../data/recipes';
 
-const CUISINES = ['All', 'Italian', 'Japanese', 'French', 'Indian', 'Mexican', 'American'];
+const CUISINES = ['All', 'Italian', 'Japanese', 'French', 'Thai', 'Vietnamese', 'Indian', 'Korean', 'Mexican'];
 const SERVINGS_OPTIONS = ['Any', '1–2', '3–4', '5+'];
 const COST_OPTIONS = ['Any', '$', '$$', '$$$'];
 
@@ -84,7 +84,7 @@ export default function Discover() {
 
   const pantryNames = pantry.map(p => p.name.toLowerCase());
 
-  const withMatch = useMemo(() => RECIPES.map(r => {
+  const withMatch = useMemo(() => DISCOVER_RECIPES.map(r => {
     const matched = r.ingredients.filter(ing =>
       pantryNames.some(p => p.includes(ing.item.toLowerCase()) || ing.item.toLowerCase().includes(p))
     ).length;

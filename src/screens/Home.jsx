@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { RECIPES } from '../data/recipes';
+import { MY_RECIPES } from '../data/recipes';
 import { PANTRY_INITIAL } from '../data/pantry';
 
 function greeting() {
@@ -155,7 +155,7 @@ function PantryRecipeCard({ recipe }) {
 export default function Home() {
   const { user, pantry } = useApp();
   const effectivePantry = pantry.length ? pantry : PANTRY_INITIAL;
-  const rankedRecipes = getPantryMatches(RECIPES, effectivePantry);
+  const rankedRecipes = getPantryMatches(MY_RECIPES, effectivePantry);
 
   return (
     <div className="bg-bg min-h-full flex flex-col relative overflow-hidden" style={{ minHeight: '100%' }}>

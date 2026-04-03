@@ -34,9 +34,9 @@ function ConfirmDialog({ onCancel, onConfirm }) {
 export default function CookingMode() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { recipes, user, tweakedRecipes, markRecentlyCooked, addToast } = useApp();
+  const { allRecipes, user, tweakedRecipes, markRecentlyCooked, addToast } = useApp();
 
-  const recipe = recipes.find(r => r.id === id);
+  const recipe = allRecipes.find(r => r.id === id);
   const [stepIdx, setStepIdx] = useState(0);
   const [timers, setTimers] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);

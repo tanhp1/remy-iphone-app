@@ -6,9 +6,9 @@ import BottomSheet from '../components/BottomSheet';
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { recipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast } = useApp();
+  const { allRecipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast } = useApp();
 
-  const recipe = recipes.find(r => r.id === id);
+  const recipe = allRecipes.find(r => r.id === id);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [tweakInput, setTweakInput] = useState('');
   const [tweakLoading, setTweakLoading] = useState(false);

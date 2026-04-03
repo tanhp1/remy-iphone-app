@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { RECIPES } from '../data/recipes';
+import { RECIPES, MY_RECIPES } from '../data/recipes';
 import { PANTRY_INITIAL } from '../data/pantry';
 
 const AppContext = createContext(null);
@@ -14,7 +14,8 @@ export function AppProvider({ children }) {
     isPro: true,
   });
 
-  const [recipes, setRecipes] = useState(RECIPES);
+  const [recipes, setRecipes] = useState(MY_RECIPES);
+  const allRecipes = RECIPES; // full list for detail/cook lookups
   const [pantry, setPantry] = useState(PANTRY_INITIAL);
   const [tweakedRecipes, setTweakedRecipes] = useState(new Set());
   const [recentlyCookedIds, setRecentlyCookedIds] = useState([]);
@@ -61,6 +62,7 @@ export function AppProvider({ children }) {
   const value = {
     user,
     recipes,
+    allRecipes,
     pantry,
     tweakedRecipes,
     recentlyCookedIds,
