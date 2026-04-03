@@ -1,0 +1,17 @@
+export const PANTRY_INITIAL = [
+  { id: 'p1',  name: 'Chicken thighs',  qty: '2 lbs',       category: 'Proteins',       expiringSoon: true  },
+  { id: 'p2',  name: 'Olive oil',        qty: 'Half bottle', category: 'Pantry staples', expiringSoon: false },
+  { id: 'p3',  name: 'Garlic',           qty: '1 head',      category: 'Produce',        expiringSoon: false },
+  { id: 'p4',  name: 'Yellow onion',     qty: '2',           category: 'Produce',        expiringSoon: false },
+  { id: 'p5',  name: 'Bell peppers',     qty: '3',           category: 'Produce',        expiringSoon: true  },
+  { id: 'p6',  name: 'Broccoli',         qty: '1 head',      category: 'Produce',        expiringSoon: true  },
+  { id: 'p7',  name: 'Soy sauce',        qty: 'Plenty',      category: 'Pantry staples', expiringSoon: false },
+  { id: 'p8',  name: 'Sesame oil',       qty: '1 bottle',    category: 'Pantry staples', expiringSoon: false },
+  { id: 'p9',  name: 'Chicken broth',    qty: '4 cups',      category: 'Pantry staples', expiringSoon: false },
+  { id: 'p10', name: 'Eggs',             qty: '6',           category: 'Dairy',          expiringSoon: false },
+  { id: 'p11', name: 'Parmesan',         qty: 'Block',       category: 'Dairy',          expiringSoon: false },
+  { id: 'p12', name: 'Butter',           qty: '1 stick',     category: 'Dairy',          expiringSoon: false },
+  { id: 'p13', name: 'Heavy cream',      qty: '1 cup',       category: 'Dairy',          expiringSoon: false },
+  { id: 'p14', name: 'Black beans',      qty: '2 cans',      category: 'Pantry staples', expiringSoon: false },
+  { id: 'p15', name: 'Limes',            qty: '4',           category: 'Produce',        expiringSoon: false },
+];
