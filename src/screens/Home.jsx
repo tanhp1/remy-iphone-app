@@ -28,16 +28,8 @@ function getPantryMatches(recipes, pantry) {
 // ─── Voice button ───────────────────────────────────────────
 function VoiceButton() {
   const [listening, setListening] = useState(false);
-  const [label, setLabel] = useState('Hold to ask Remy');
 
-  const handlePress = () => {
-    setListening(true);
-    setLabel('Listening...');
-  };
-  const handleRelease = () => {
-    setListening(false);
-    setLabel('Hold to ask Remy');
-  };
+  const toggle = () => setListening(v => !v);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -50,10 +42,7 @@ function VoiceButton() {
           </>
         )}
         <button
-          onMouseDown={handlePress}
-          onMouseUp={handleRelease}
-          onTouchStart={handlePress}
-          onTouchEnd={handleRelease}
+          onClick={toggle}
           className={`relative w-16 h-16 rounded-full flex items-center justify-center
             transition-all duration-200 z-10
             ${listening
@@ -70,10 +59,14 @@ function VoiceButton() {
           </svg>
         </button>
       </div>
-      <p className={`text-xs font-semibold transition-colors duration-200
-        ${listening ? 'text-terra' : 'text-t3'}`}>
-        {label}
-      </p>
+      {listening ? (
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-terra animate-pulse" />
+          <p className="text-xs font-semibold text-terra">Remy is listening</p>
+        </div>
+      ) : (
+        <p className="text-xs font-semibold text-t3">Ask Remy</p>
+      )}
     </div>
   );
 }

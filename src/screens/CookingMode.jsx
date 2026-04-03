@@ -40,6 +40,7 @@ export default function CookingMode() {
   const [stepIdx, setStepIdx] = useState(0);
   const [timers, setTimers] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);
+  const [remyListening, setRemyListening] = useState(true);
   const [askOpen, setAskOpen] = useState(false);
   const [askInput, setAskInput] = useState('');
   const [askLoading, setAskLoading] = useState(false);
@@ -103,6 +104,27 @@ export default function CookingMode() {
 
   return (
     <div className="bg-bg min-h-full flex flex-col">
+      {/* Remy listening indicator */}
+      <button
+        onClick={() => setRemyListening(v => !v)}
+        className={`flex-shrink-0 flex items-center justify-center gap-2 py-2 transition-colors duration-200
+          ${remyListening ? 'bg-terra/10 border-b border-terra/20' : 'bg-bg border-b border-s3'}`}
+      >
+        {remyListening ? (
+          <>
+            <span className="flex gap-0.5 items-end h-4">
+              {[1,2,3,4,3,2,1].map((h, i) => (
+                <span key={i} className="w-0.5 bg-terra rounded-full animate-pulse"
+                  style={{ height: `${h * 4}px`, animationDelay: `${i * 80}ms` }} />
+              ))}
+            </span>
+            <span className="text-terra text-xs font-semibold">Remy is listening · tap to mute</span>
+          </>
+        ) : (
+          <span className="text-t3 text-xs font-semibold">Remy is muted · tap to unmute</span>
+        )}
+      </button>
+
       {/* Top bar */}
       <div className="flex-shrink-0 bg-bg border-b border-s3 px-5 py-3">
         <div className="flex items-center justify-between mb-3">
