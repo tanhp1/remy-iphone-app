@@ -6,7 +6,7 @@ import BottomSheet from '../components/BottomSheet';
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { allRecipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast } = useApp();
+  const { allRecipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast, addGroceryItems, groceryList } = useApp();
 
   const recipe = allRecipes.find(r => r.id === id);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -23,6 +23,14 @@ export default function RecipeDetail() {
   const servings = servingsOverride[id] ?? recipe.servings;
   const inPantryCount = recipe.ingredients.filter(i => i.inPantry).length;
   const pantryPct = Math.round((inPantryCount / recipe.ingredients.length) * 100);
+  const missingIngredients = recipe.ingredients.filter(i => !i.inPantry && !(i.isNew && !isTweaked));
+  const groceryNames = new Set(groceryList.map(g => g.name.toLowerCase()));
+  const notYetInGrocery = missingIngredients.filter(i => !groceryNames.has(i.item.toLowerCase()));
+
+  const handleAddMissingToGrocery = () => {
+    addGroceryItems(notYetInGrocery.map(i => ({ name: i.item, qty: `${i.qty} ${i.unit}`.trim() })));
+    addToast(`${notYetInGrocery.length} item${notYetInGrocery.length !== 1 ? 's' : ''} added to grocery list`, 'success');
+  };
 
   const handleApplyTweak = () => {
     setTweakLoading(true);
@@ -90,9 +98,28 @@ export default function RecipeDetail() {
           <p className="text-sage font-semibold text-sm">You have {inPantryCount} of {recipe.ingredients.length} ingredients</p>
           <p className="text-sage text-xs font-bold">{pantryPct}%</p>
         </div>
-        <div className="h-1.5 bg-s3 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-s3 rounded-full overflow-hidden mb-3">
           <div className="h-full bg-sage rounded-full transition-all duration-500" style={{ width: `${pantryPct}%` }} />
         </div>
+        {notYetInGrocery.length > 0 ? (
+          <button
+            onClick={handleAddMissingToGrocery}
+            className="w-full flex items-center justify-center gap-2 bg-s1 border border-s3 rounded-lg py-2.5
+              active:bg-s2 transition-colors"
+          >
+            <span className="text-sm">🛒</span>
+            <span className="text-t1 text-xs font-semibold">
+              Add {notYetInGrocery.length} missing item{notYetInGrocery.length !== 1 ? 's' : ''} to grocery list
+            </span>
+          </button>
+        ) : missingIngredients.length > 0 ? (
+          <div className="flex items-center justify-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6DB87A" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span className="text-sage text-xs font-semibold">All missing items already in your grocery list</span>
+          </div>
+        ) : null}
       </div>
 
       {/* Ingredients */}

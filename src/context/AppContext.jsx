@@ -16,6 +16,12 @@ export function AppProvider({ children }) {
 
   const [recipes, setRecipes] = useState(MY_RECIPES);
   const allRecipes = RECIPES; // full list for detail/cook lookups
+
+  const [groceryList, setGroceryList] = useState([
+    { id: 'g1', name: 'Eggs',            qty: '1 dozen', checked: false },
+    { id: 'g2', name: 'Whole milk',       qty: '1 gallon', checked: false },
+    { id: 'g3', name: 'Cherry tomatoes',  qty: '1 pint',  checked: false },
+  ]);
   const [pantry, setPantry] = useState(PANTRY_INITIAL);
   const [tweakedRecipes, setTweakedRecipes] = useState(new Set());
   const [recentlyCookedIds, setRecentlyCookedIds] = useState([]);
@@ -55,6 +61,20 @@ export function AppProvider({ children }) {
     setPantry(prev => [...items, ...prev]);
   }, []);
 
+  const addGroceryItems = useCallback((items) => {
+    setGroceryList(prev => {
+      const existingNames = new Set(prev.map(i => i.name.toLowerCase()));
+      const newItems = items
+        .filter(i => !existingNames.has(i.name.toLowerCase()))
+        .map(i => ({ ...i, id: `grocery-${Date.now()}-${Math.random()}`, checked: false }));
+      return [...prev, ...newItems];
+    });
+  }, []);
+
+  const updateGroceryList = useCallback((updater) => {
+    setGroceryList(updater);
+  }, []);
+
   const removePantryItem = useCallback((id) => {
     setPantry(prev => prev.filter(p => p.id !== id));
   }, []);
@@ -77,6 +97,9 @@ export function AppProvider({ children }) {
     updateServings,
     addPantryItems,
     removePantryItem,
+    groceryList,
+    addGroceryItems,
+    updateGroceryList,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -23,7 +23,7 @@ function StarRow({ value, count }) {
   );
 }
 
-function DiscoverCard({ recipe, pantryMatch }) {
+function DiscoverCard({ recipe, pantryMatch, onAddMissing, missingCount, allInGrocery }) {
   const navigate = useNavigate();
   return (
     <div
@@ -58,7 +58,7 @@ function DiscoverCard({ recipe, pantryMatch }) {
         <p className="text-t1 font-bold text-sm leading-snug mb-1">{recipe.title}</p>
         <p className="text-t3 text-xs mb-2">{recipe.cuisine} · {recipe.prepTime + recipe.cookTime} min · {recipe.servings} servings · {recipe.cost}</p>
         {recipe.rating && <StarRow value={recipe.rating.overall} count={recipe.rating.count} />}
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1 mt-2 mb-2.5">
           {recipe.dietaryTags.slice(0, 2).map(t => (
             <span key={t} className="bg-s2 text-t2 border border-s3 rounded-full px-2 py-0.5 text-[10px] font-medium">
               {t}
@@ -68,6 +68,25 @@ function DiscoverCard({ recipe, pantryMatch }) {
             {recipe.difficulty}
           </span>
         </div>
+        {allInGrocery ? (
+          <div className="flex items-center gap-1 pt-2 border-t border-s3">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6DB87A" strokeWidth="2.5" strokeLinecap="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span className="text-[10px] font-semibold text-sage">Missing items in grocery list</span>
+          </div>
+        ) : missingCount > 0 ? (
+          <button
+            onClick={e => { e.stopPropagation(); onAddMissing(); }}
+            className="w-full flex items-center justify-center gap-1.5 pt-2 border-t border-s3
+              active:opacity-70 transition-opacity"
+          >
+            <span className="text-xs">🛒</span>
+            <span className="text-[10px] font-semibold text-t2">
+              Add {missingCount} missing to grocery list
+            </span>
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -75,7 +94,8 @@ function DiscoverCard({ recipe, pantryMatch }) {
 
 export default function Discover() {
   const navigate = useNavigate();
-  const { pantry } = useApp();
+  const { pantry, addGroceryItems, groceryList, addToast } = useApp();
+  const groceryNames = useMemo(() => new Set(groceryList.map(g => g.name.toLowerCase())), [groceryList]);
   const [search, setSearch] = useState('');
   const [cuisine, setCuisine] = useState('All');
   const [servings, setServings] = useState('Any');
@@ -199,9 +219,20 @@ export default function Discover() {
               <div className="flex-1 h-px bg-s3" />
             </div>
             <div className="grid grid-cols-1 gap-3">
-              {chefRecipes.map(r => (
-                <DiscoverCard key={r.id} recipe={r} pantryMatch={r.pantryMatchPct} />
-              ))}
+              {chefRecipes.map(r => {
+                const missing = r.ingredients.filter(i => !i.inPantry);
+                const notInGrocery = missing.filter(i => !groceryNames.has(i.item.toLowerCase()));
+                return (
+                  <DiscoverCard key={r.id} recipe={r} pantryMatch={r.pantryMatchPct}
+                    missingCount={notInGrocery.length}
+                    allInGrocery={missing.length > 0 && notInGrocery.length === 0}
+                    onAddMissing={() => {
+                      addGroceryItems(notInGrocery.map(i => ({ name: i.item, qty: `${i.qty} ${i.unit}`.trim() })));
+                      addToast(`${notInGrocery.length} item${notInGrocery.length !== 1 ? 's' : ''} added to grocery list`, 'success');
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -217,9 +248,20 @@ export default function Discover() {
               <div className="flex-1 h-px bg-s3" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {otherRecipes.map(r => (
-                <DiscoverCard key={r.id} recipe={r} pantryMatch={r.pantryMatchPct} />
-              ))}
+              {otherRecipes.map(r => {
+                const missing = r.ingredients.filter(i => !i.inPantry);
+                const notInGrocery = missing.filter(i => !groceryNames.has(i.item.toLowerCase()));
+                return (
+                  <DiscoverCard key={r.id} recipe={r} pantryMatch={r.pantryMatchPct}
+                    missingCount={notInGrocery.length}
+                    allInGrocery={missing.length > 0 && notInGrocery.length === 0}
+                    onAddMissing={() => {
+                      addGroceryItems(notInGrocery.map(i => ({ name: i.item, qty: `${i.qty} ${i.unit}`.trim() })));
+                      addToast(`${notInGrocery.length} item${notInGrocery.length !== 1 ? 's' : ''} added to grocery list`, 'success');
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
         )}

@@ -18,12 +18,9 @@ const CAT_COLORS = {
 };
 
 // ─── Grocery List ─────────────────────────────────────────
-function GroceryList({ addPantryItems, addToast }) {
-  const [items, setItems] = useState([
-    { id: 'g1', name: 'Eggs',         qty: '1 dozen', checked: false },
-    { id: 'g2', name: 'Whole milk',   qty: '1 gallon', checked: false },
-    { id: 'g3', name: 'Cherry tomatoes', qty: '1 pint', checked: false },
-  ]);
+function GroceryList({ addPantryItems, addToast, groceryList, updateGroceryList }) {
+  const items = groceryList;
+  const setItems = updateGroceryList;
   const [newItem, setNewItem] = useState({ name: '', qty: '' });
   const [addMode, setAddMode] = useState(false);
 
@@ -162,7 +159,7 @@ function GroceryList({ addPantryItems, addToast }) {
 // ─── Main ─────────────────────────────────────────────────
 export default function PantryManager() {
   const navigate = useNavigate();
-  const { pantry, addPantryItems, removePantryItem, addToast } = useApp();
+  const { pantry, addPantryItems, removePantryItem, addToast, groceryList, updateGroceryList } = useApp();
 
   const [mainTab, setMainTab] = useState('pantry'); // 'pantry' | 'grocery'
   const [activeTab, setActiveTab] = useState('All');
@@ -226,7 +223,7 @@ export default function PantryManager() {
       </div>
 
       {mainTab === 'grocery' ? (
-        <GroceryList addPantryItems={addPantryItems} addToast={addToast} />
+        <GroceryList addPantryItems={addPantryItems} addToast={addToast} groceryList={groceryList} updateGroceryList={updateGroceryList} />
       ) : (
         <>
           {/* Scrollable area */}
