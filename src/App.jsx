@@ -9,6 +9,9 @@ import VoiceHandoff from './screens/VoiceHandoff';
 import PostCookRating from './screens/PostCookRating';
 import PantryManager from './screens/PantryManager';
 import Profile from './screens/Profile';
+import Discover from './screens/Discover';
+import UploadRecipe from './screens/UploadRecipe';
+import Subscription from './screens/Subscription';
 
 export default function App() {
   return (
@@ -24,6 +27,9 @@ export default function App() {
             <Route path="recipes/:id/rating" element={<PostCookRating />} />
             <Route path="pantry" element={<PantryManager />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="discover" element={<Discover />} />
+            <Route path="upload-recipe" element={<UploadRecipe />} />
+            <Route path="subscription" element={<Subscription />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

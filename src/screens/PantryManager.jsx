@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { PANTRY_SUGGESTIONS } from '../data/mockResponses';
-import SkeletonCard from '../components/SkeletonCard';
 
 const CATS = ['All', 'Produce', 'Proteins', 'Dairy', 'Pantry staples'];
 
@@ -26,7 +24,6 @@ export default function PantryManager() {
   const [scanning, setScanning] = useState(false);
   const [scanDone, setScanDone] = useState(false);
   const [suggesting, setSuggesting] = useState(false);
-  const [showResults, setShowResults] = useState(false);
   const [swipedId, setSwipedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editQty, setEditQty] = useState('');
@@ -48,11 +45,7 @@ export default function PantryManager() {
   };
 
   const handleSuggest = () => {
-    setSuggesting(true);
-    setTimeout(() => {
-      setSuggesting(false);
-      setShowResults(true);
-    }, 1200);
+    navigate('/discover');
   };
 
   const handleDelete = (id) => {
@@ -221,43 +214,13 @@ export default function PantryManager() {
 
       {/* Sticky CTA */}
       <div className="absolute bottom-16 left-0 right-0 px-4 py-3 bg-bg/90 backdrop-blur-sm border-t border-s3">
-        {showResults ? (
-          <div className="animate-fade-in">
-            <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-3 text-center">Tonight's options</p>
-            <div className="flex flex-col gap-2">
-              {PANTRY_SUGGESTIONS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => navigate(`/recipes/${s.id}`)}
-                  className="flex items-center gap-3 bg-s1 border border-s3 rounded-xl px-4 py-3
-                    active:bg-s2 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-xl"
-                    style={{ backgroundColor: s.color }}>
-                    {s.emoji}
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-t1 font-semibold text-sm">{s.title}</p>
-                    <p className="text-t3 text-xs">{s.cuisine} · {s.time} min</p>
-                  </div>
-                  <span className="text-terra text-xs font-bold">{s.match}%</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : suggesting ? (
-          <div className="flex flex-col gap-2">
-            {[1, 2, 3].map(i => <SkeletonCard key={i} height="h-14" />)}
-          </div>
-        ) : (
-          <button
-            onClick={handleSuggest}
-            className="w-full bg-terra text-white rounded-xl py-4 font-semibold text-base
-              active:scale-95 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)]"
-          >
-            🤖 What can I make tonight?
-          </button>
-        )}
+        <button
+          onClick={handleSuggest}
+          className="w-full bg-terra text-white rounded-xl py-4 font-semibold text-base
+            active:scale-95 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)]"
+        >
+          🤖 What can I make tonight?
+        </button>
       </div>
     </div>
   );

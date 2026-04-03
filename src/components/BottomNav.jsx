@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const HIDDEN_ON = ['/cook', '/voice', '/rating', '/'];
+const HIDDEN_ON = ['/cook', '/voice', '/rating'];
 
 const tabs = [
   {
@@ -20,6 +20,17 @@ const tabs = [
         stroke={active ? '#D4654A' : '#6D6D72'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'discover', label: 'Discover', path: '/discover',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke={active ? '#D4654A' : '#6D6D72'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <polyline points="11 8 14 11 11 14 8 11 11 8"/>
       </svg>
     ),
   },
@@ -50,7 +61,7 @@ export default function BottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const hide = HIDDEN_ON.some(p => location.pathname.endsWith(p));
+  const hide = HIDDEN_ON.some(p => location.pathname.includes(p));
   if (hide) return null;
 
   const isActive = (path) => {
@@ -60,14 +71,14 @@ export default function BottomNav() {
 
   return (
     <div className="flex-shrink-0 bg-s1/95 border-t border-s3 backdrop-blur-xl">
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-16 px-1">
         {tabs.map(tab => {
           const active = isActive(tab.path);
           return (
             <button
               key={tab.id}
               onClick={() => navigate(tab.path)}
-              className="flex flex-col items-center gap-0.5 px-4 py-1 active:scale-90 transition-transform duration-100"
+              className="flex flex-col items-center gap-0.5 px-3 py-1 active:scale-90 transition-transform duration-100"
             >
               {tab.icon(active)}
               <span className={`text-[10px] font-semibold ${active ? 'text-terra' : 'text-t3'}`}>

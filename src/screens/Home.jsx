@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { RECIPES } from '../data/recipes';
@@ -25,83 +25,6 @@ function getPantryMatches(recipes, pantry) {
     .sort((a, b) => b.pantryMatch - a.pantryMatch);
 }
 
-// ─── Sidebar ───────────────────────────────────────────────
-const navLinks = [
-  { label: 'Recipes',  icon: '📖', path: '/recipes'  },
-  { label: 'Pantry',   icon: '📦', path: '/pantry'   },
-  { label: 'Profile',  icon: '👤', path: '/profile'  },
-];
-
-function Sidebar({ open, onClose }) {
-  const navigate = useNavigate();
-  const { user } = useApp();
-
-  const go = (path) => { onClose(); setTimeout(() => navigate(path), 200); };
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        className={`absolute inset-0 z-40 bg-black transition-opacity duration-300
-          ${open ? 'opacity-60 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-      />
-      {/* Drawer */}
-      <div
-        className={`absolute top-0 left-0 bottom-0 z-50 w-[72%] bg-s1 flex flex-col
-          transition-transform duration-300 ease-out shadow-2xl`}
-        style={{
-          transform: open ? 'translateX(0)' : 'translateX(-100%)',
-          borderRight: '1px solid #3A3A3C',
-          borderRadius: '0 28px 28px 0',
-        }}
-      >
-        {/* User info */}
-        <div className="px-6 pt-14 pb-6 border-b border-s3"
-          style={{ background: 'linear-gradient(160deg, #1A0E0A 0%, #1C1C1E 100%)' }}>
-          <div className="w-12 h-12 rounded-full bg-terra flex items-center justify-center mb-3
-            shadow-[0_0_16px_rgba(212,101,74,0.4)]">
-            <span className="text-white font-bold text-lg">{user.name[0]}</span>
-          </div>
-          <p className="text-t1 font-bold text-base">{user.name}</p>
-          <p className="text-t2 text-xs mt-0.5">{user.skillLevel} · {user.dietaryLifestyle}</p>
-          {user.isPro && (
-            <span className="inline-flex items-center gap-1 mt-2 bg-terra/20 text-terra text-[10px] font-bold
-              px-2.5 py-0.5 rounded-full border border-terra/30">
-              ✨ Remy Pro
-            </span>
-          )}
-        </div>
-
-        {/* Nav links */}
-        <nav className="flex-1 px-4 py-6 flex flex-col gap-1">
-          {navLinks.map(link => (
-            <button
-              key={link.path}
-              onClick={() => go(link.path)}
-              className="flex items-center gap-4 px-4 py-3.5 rounded-2xl text-left w-full
-                active:bg-s2 transition-colors group"
-            >
-              <span className="text-xl w-7 text-center">{link.icon}</span>
-              <span className="text-t1 font-semibold text-base">{link.label}</span>
-              <svg className="ml-auto opacity-30 group-active:opacity-60"
-                width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <polyline points="9 18 15 12 9 6"/>
-              </svg>
-            </button>
-          ))}
-        </nav>
-
-        {/* Bottom */}
-        <div className="px-6 py-5 border-t border-s3">
-          <p className="text-t3 text-[11px] text-center">Remy v2.0 · AI Cooking Assistant</p>
-        </div>
-      </div>
-    </>
-  );
-}
-
 // ─── Voice button ───────────────────────────────────────────
 function VoiceButton() {
   const [listening, setListening] = useState(false);
@@ -118,7 +41,6 @@ function VoiceButton() {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      {/* Outer rings */}
       <div className="relative flex items-center justify-center">
         {listening && (
           <>
@@ -152,6 +74,41 @@ function VoiceButton() {
         ${listening ? 'text-terra' : 'text-t3'}`}>
         {label}
       </p>
+    </div>
+  );
+}
+
+// ─── Start Cooking button ───────────────────────────────────
+function StartCookingButton({ recipes, pantry }) {
+  const navigate = useNavigate();
+  const pantryNames = pantry.map(p => p.name.toLowerCase());
+  const top = recipes
+    .map(r => {
+      const matched = r.ingredients.filter(ing =>
+        pantryNames.some(p => p.includes(ing.item.toLowerCase()) || ing.item.toLowerCase().includes(p))
+      ).length;
+      return { ...r, pct: Math.round((matched / r.ingredients.length) * 100) };
+    })
+    .sort((a, b) => b.pct - a.pct)[0];
+
+  const handlePress = () => {
+    if (top) navigate(`/recipes/${top.id}/cook`);
+    else navigate('/recipes');
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <button
+        onClick={handlePress}
+        className="w-16 h-16 rounded-full bg-s2 border-2 border-terra flex items-center justify-center
+          shadow-[0_0_16px_rgba(212,101,74,0.3)] active:scale-95 transition-all duration-200"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="#D4654A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+      </button>
+      <p className="text-xs font-semibold text-t3">Start cooking</p>
     </div>
   );
 }
@@ -204,31 +161,19 @@ function PantryRecipeCard({ recipe }) {
 // ─── Main component ─────────────────────────────────────────
 export default function Home() {
   const { user, pantry } = useApp();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const rankedRecipes = getPantryMatches(RECIPES, pantry.length ? pantry : PANTRY_INITIAL);
+  const effectivePantry = pantry.length ? pantry : PANTRY_INITIAL;
+  const rankedRecipes = getPantryMatches(RECIPES, effectivePantry);
 
   return (
     <div className="bg-bg min-h-full flex flex-col relative overflow-hidden" style={{ minHeight: '100%' }}>
 
       {/* ── Top bar ── */}
-      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3 relative z-30">
-        {/* Menu button */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="w-10 h-10 bg-s1 border border-s3 rounded-2xl flex flex-col items-center
-            justify-center gap-[5px] active:scale-90 transition-transform"
-        >
-          <span className="w-4 h-[1.5px] bg-t1 rounded-full" />
-          <span className="w-4 h-[1.5px] bg-t1 rounded-full" />
-          <span className="w-2.5 h-[1.5px] bg-t2 rounded-full self-start ml-3" />
-        </button>
-
+      <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3">
         {/* Wordmark */}
         <div className="flex items-center gap-1.5">
           <span className="text-lg">👨‍🍳</span>
           <span className="font-serif text-t1 font-bold text-lg tracking-tight">Remy</span>
         </div>
-
         {/* User avatar */}
         <div className="w-10 h-10 rounded-full bg-terra flex items-center justify-center
           shadow-[0_0_12px_rgba(212,101,74,0.35)]">
@@ -252,7 +197,7 @@ export default function Home() {
           Based on your pantry
         </p>
         <span className="bg-s2 border border-s3 text-t2 text-[10px] font-bold px-2 py-0.5 rounded-full">
-          {PANTRY_INITIAL.length} items
+          {effectivePantry.length} items
         </span>
       </div>
 
@@ -279,13 +224,11 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Voice button ── */}
-      <div className="flex-shrink-0 flex items-center justify-center py-5 pb-8">
+      {/* ── Action buttons ── */}
+      <div className="flex-shrink-0 flex items-center justify-center gap-10 py-5 pb-6">
+        <StartCookingButton recipes={rankedRecipes} pantry={effectivePantry} />
         <VoiceButton />
       </div>
-
-      {/* ── Sidebar ── */}
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </div>
   );
 }
