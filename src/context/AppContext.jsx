@@ -5,7 +5,8 @@ import { PANTRY_INITIAL } from '../data/pantry';
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  const [user] = useState({
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
+  const [user, setUser] = useState({
     name: 'Alex',
     skillLevel: 'Home cook',
     dietaryLifestyle: 'Keto',
@@ -13,6 +14,19 @@ export function AppProvider({ children }) {
     timeBudget: 60,
     isPro: true,
   });
+
+  const completeOnboarding = useCallback(({ skillLevel, dietaryLifestyle, pantryItems }) => {
+    setUser(prev => ({ ...prev, skillLevel, dietaryLifestyle }));
+    if (pantryItems.length > 0) {
+      setPantry(prev => [
+        ...pantryItems.map((name, i) => ({
+          id: `onboard-${i}`, name, qty: '—', category: 'Pantry staples', expiringSoon: false,
+        })),
+        ...prev,
+      ]);
+    }
+    setOnboardingComplete(true);
+  }, []);
 
   const [recipes, setRecipes] = useState(MY_RECIPES);
   const allRecipes = RECIPES; // full list for detail/cook lookups
@@ -81,6 +95,8 @@ export function AppProvider({ children }) {
 
   const value = {
     user,
+    onboardingComplete,
+    completeOnboarding,
     recipes,
     allRecipes,
     pantry,
