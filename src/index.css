@@ -14,3 +14,31 @@
 
 * { -webkit-tap-highlight-color: transparent; }
 body { background: #0D0D0D; }
+
+/* Tab / page transition */
+@keyframes pageFadeSlide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-page-enter {
+  animation: pageFadeSlide 0.22s ease-out both;
+}
+
+/* Splash screen */
+@keyframes splashFadeOut {
+  0%   { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+.splash-fade {
+  animation: splashFadeOut 1.8s ease-out forwards;
+}
+
+/* Fade in utility */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out both;
+}

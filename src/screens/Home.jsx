@@ -218,9 +218,29 @@ export default function Home() {
       )}
 
       {/* ── Action buttons ── */}
-      <div className="flex-shrink-0 flex items-center justify-center gap-10 py-5 pb-6">
-        <StartCookingButton recipes={rankedRecipes} pantry={effectivePantry} />
-        <VoiceButton />
+      <div className="flex-shrink-0 mx-5 mb-5">
+        <div className="flex items-stretch gap-4">
+          {/* Start Cooking — primary */}
+          <div className="flex-[2] flex flex-col items-center gap-2">
+            <StartCookingButton recipes={rankedRecipes} pantry={effectivePantry} />
+            <div className="text-center">
+              <p className="text-t1 text-xs font-semibold">Start Cooking</p>
+              <p className="text-t3 text-[10px] mt-0.5">Jump into your best match</p>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="w-px bg-s3 self-stretch my-2" />
+
+          {/* Voice — secondary */}
+          <div className="flex-[2] flex flex-col items-center gap-2">
+            <VoiceButton />
+            <div className="text-center">
+              <p className="text-t1 text-xs font-semibold">Ask Remy</p>
+              <p className="text-t3 text-[10px] mt-0.5">Hands-free AI assistant</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

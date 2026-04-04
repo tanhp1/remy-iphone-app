@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 const TIERS = [
   {
     id: 'free',
-    name: 'Free',
+    name: 'Remy Starter',
     price: '$0',
     period: 'forever',
     color: '#6D6D72',
@@ -24,7 +24,7 @@ const TIERS = [
   },
   {
     id: 'basic',
-    name: 'Basic',
+    name: 'Remy Home',
     price: '$4.99',
     period: 'per month',
     color: '#D4654A',
@@ -44,11 +44,12 @@ const TIERS = [
   },
   {
     id: 'premium',
-    name: 'Premium',
+    name: 'Remy Pro',
     price: '$9.99',
     period: 'per month',
     color: '#B8860B',
     badge: '✨ Pro',
+    tagline: 'The full Remy experience',
     features: [
       'Everything in Basic',
       'Full voice + hands-free nav',
@@ -81,7 +82,7 @@ export default function Subscription() {
   const actionLabel = () => {
     const sel = TIERS.find(t => t.id === selected);
     if (selected === currentTier) return 'Current plan';
-    if (selected === 'free') return 'Downgrade to Free';
+    if (selected === 'free') return 'Switch to Remy Starter';
     return `Upgrade to ${sel.name} — ${sel.price}/mo`;
   };
 

@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import BottomNav from './BottomNav';
 import Toast from './Toast';
 import BottomSheet from './BottomSheet';
@@ -44,6 +45,35 @@ function StatusBar() {
   );
 }
 
+function SplashScreen() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => { setTimeout(() => setVisible(false), 1900); }, []);
+  if (!visible) return null;
+  return (
+    <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-bg rounded-[47px] splash-fade">
+      <div className="relative mb-5">
+        <div className="w-24 h-24 rounded-3xl bg-terra/15 flex items-center justify-center
+          shadow-[0_0_48px_rgba(212,101,74,0.35)]">
+          <span className="text-5xl">👨‍🍳</span>
+        </div>
+        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-terra rounded-xl flex items-center justify-center
+          shadow-[0_0_12px_rgba(212,101,74,0.5)]">
+          <span className="text-white text-sm font-bold">✨</span>
+        </div>
+      </div>
+      <p className="font-serif text-3xl font-bold text-t1 tracking-tight mb-1">Remy</p>
+      <p className="text-t3 text-xs font-medium">AI Cooking Assistant</p>
+      <div className="absolute bottom-12 flex gap-1.5">
+        {[0,1,2].map(i => (
+          <div key={i} className="w-1.5 h-1.5 rounded-full bg-terra/40"
+            style={{ animation: `pulse 1s ease-in-out ${i * 0.2}s infinite alternate` }} />
+        ))}
+      </div>
+      <style>{`@keyframes pulse { from { opacity:0.3; transform:scale(0.8); } to { opacity:1; transform:scale(1); } }`}</style>
+    </div>
+  );
+}
+
 export default function PhoneShell() {
   const location = useLocation();
   const { sheet, closeSheet } = useApp();
@@ -79,6 +109,7 @@ export default function PhoneShell() {
           className="absolute inset-[3px] rounded-[47px] overflow-hidden bg-bg flex flex-col"
           style={{ position: 'absolute' }}
         >
+          <SplashScreen />
           <StatusBar />
 
           {/* Page content */}

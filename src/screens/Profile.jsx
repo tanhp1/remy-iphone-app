@@ -36,7 +36,7 @@ export default function Profile() {
             ${user.isPro
               ? 'bg-terra/15 text-terra border-terra/30'
               : 'bg-s2 text-t3 border-s3'}`}>
-            {user.isPro ? 'Premium' : 'Free'}
+            {user.isPro ? 'Remy Pro' : 'Remy Starter'}
           </span>
         </div>
         {!user.isPro && (
