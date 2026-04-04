@@ -87,7 +87,7 @@ export default function RecipeDetail() {
   const stepText = (step) => user.skillLevel === 'Beginner' ? step.beginner : step.beginner;
 
   return (
-    <div className="bg-bg min-h-full pb-28">
+    <div className="bg-bg min-h-full pb-6">
       {/* Hero */}
       <div className="relative flex items-end" style={{ backgroundColor: recipe.color, minHeight: recipe.isChefRecipe ? '224px' : '208px' }}>
         <div className="absolute inset-0 bg-black/20" />
@@ -96,13 +96,26 @@ export default function RecipeDetail() {
         </div>
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%)' }} />
 
-        {/* Chef badge */}
-        {recipe.isChefRecipe && (
-          <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-terra text-white
-            text-[11px] font-bold px-3 py-1.5 rounded-full shadow-[0_0_12px_rgba(212,101,74,0.5)]">
-            <span>👨‍🍳</span> Chef's Recipe
-          </div>
-        )}
+        {/* Top-right action pills */}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {recipe.isChefRecipe && (
+            <div className="flex items-center gap-1 bg-terra text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full">
+              <span>👨‍🍳</span> Chef's
+            </div>
+          )}
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full active:scale-90 transition-transform"
+          >
+            ✨ Tweak
+          </button>
+          <button
+            onClick={() => navigate(`/recipes/${id}/cook`)}
+            className="flex items-center gap-1 bg-terra text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full active:scale-90 transition-transform shadow-[0_0_10px_rgba(212,101,74,0.5)]"
+          >
+            ▶ Cook
+          </button>
+        </div>
 
         <div className="relative z-10 px-5 pb-4 w-full">
           <h1 className="font-serif text-2xl font-bold text-white leading-tight">{recipe.title}</h1>
@@ -238,14 +251,6 @@ export default function RecipeDetail() {
           })}
         </div>
 
-        {/* Tweak button */}
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="w-full mt-3 border border-s3 rounded-xl py-3 text-t2 text-sm font-medium
-            active:bg-s2 transition-colors"
-        >
-          ✨ Tweak this recipe
-        </button>
       </div>
 
       {/* Steps */}
@@ -282,25 +287,6 @@ export default function RecipeDetail() {
         )}
       </div>
 
-      {/* Sticky CTA */}
-      <div className="absolute bottom-16 left-0 right-0 px-4 py-3 bg-bg/90 backdrop-blur-sm border-t border-s3">
-        <div className="flex gap-3">
-          <button
-            onClick={() => navigate(`/recipes/${id}/voice`)}
-            className="flex-1 bg-s2 border border-s3 text-t1 rounded-xl py-3.5 font-semibold text-sm
-              active:scale-95 transition-transform flex items-center justify-center gap-1.5"
-          >
-            <span>🎙</span> Voice
-          </button>
-          <button
-            onClick={() => navigate(`/recipes/${id}/cook`)}
-            className="flex-[2] bg-terra text-white rounded-xl py-3.5 font-semibold text-base
-              active:scale-95 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)]"
-          >
-            Start Cooking →
-          </button>
-        </div>
-      </div>
 
       {/* Tweak sheet */}
       <BottomSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} title="Tweak this recipe">
