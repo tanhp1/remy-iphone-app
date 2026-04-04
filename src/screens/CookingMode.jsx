@@ -45,7 +45,10 @@ export default function CookingMode() {
   const [askInput, setAskInput] = useState('');
   const [askLoading, setAskLoading] = useState(false);
   const [askResponse, setAskResponse] = useState('');
+  const [voiceTranscript, setVoiceTranscript] = useState('');
   const intervalRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const remyListeningRef = useRef(true);
 
   const isTweaked = tweakedRecipes.has(id);
 
@@ -84,6 +87,80 @@ export default function CookingMode() {
   };
 
   const hasActiveTimers = Object.values(timers).some(t => t.running || t.done);
+
+  // Keep ref in sync so voice callbacks always see latest value
+  remyListeningRef.current = remyListening;
+
+  // Set up voice recognition for the listening banner
+  useEffect(() => {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) return;
+
+    const rec = new SpeechRec();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    recognitionRef.current = rec;
+
+    rec.onresult = (e) => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('');
+      setVoiceTranscript(t);
+      if (e.results[e.results.length - 1].isFinal) {
+        setVoiceTranscript('');
+        setAskInput(t);
+        setAskOpen(true);
+        setAskResponse('');
+        handleAskWithText(t);
+      }
+    };
+
+    rec.onerror = () => {};
+
+    rec.onend = () => {
+      if (remyListeningRef.current) {
+        try { rec.start(); } catch (err) {}
+      }
+    };
+
+    if (remyListeningRef.current) {
+      try { rec.start(); } catch (err) {}
+    }
+
+    return () => {
+      remyListeningRef.current = false;
+      try { rec.abort(); } catch (err) {}
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Start/stop recognition when toggle changes
+  useEffect(() => {
+    const rec = recognitionRef.current;
+    if (!rec) return;
+    if (remyListening) {
+      try { rec.start(); } catch (err) {}
+    } else {
+      try { rec.abort(); } catch (err) {}
+      setVoiceTranscript('');
+    }
+  }, [remyListening]);
+
+  const handleAskWithText = (text) => {
+    setAskLoading(true);
+    setTimeout(() => {
+      const lower = text.trim().toLowerCase();
+      if (!lower) {
+        setAskResponse(getStepContextResponse(step.beginner, stepIdx));
+      } else {
+        const key = Object.keys(ASK_REMY_RESPONSES).find(k => k !== 'default' && lower.includes(k));
+        if (key) {
+          setAskResponse(ASK_REMY_RESPONSES[key]);
+        } else {
+          setAskResponse(getStepContextResponse(step.beginner, stepIdx));
+        }
+      }
+      setAskLoading(false);
+    }, 800);
+  };
 
   const handleAsk = () => {
     setAskLoading(true);
@@ -129,7 +206,9 @@ export default function CookingMode() {
                   style={{ height: `${h * 4}px`, animationDelay: `${i * 80}ms` }} />
               ))}
             </span>
-            <span className="text-terra text-xs font-semibold">Little Chef is listening · tap to mute</span>
+            <span className="text-terra text-xs font-semibold">
+              {voiceTranscript ? `"${voiceTranscript}"` : 'Little Chef is listening · tap to mute'}
+            </span>
           </>
         ) : (
           <span className="text-t3 text-xs font-semibold">Little Chef is muted · tap to unmute</span>

@@ -6,19 +6,6 @@ const VOICE_COMMANDS = [
   '"Next step"', '"Repeat that"', '"Set a timer"', '"What do I need?"', '"Stop cooking"',
 ];
 
-function WaveBar({ delay = 0, active }) {
-  return (
-    <div
-      className={`w-1 rounded-full transition-all duration-300 ${active ? 'bg-terra' : 'bg-s3'}`}
-      style={{
-        height: active ? `${12 + Math.random() * 20}px` : '6px',
-        animationDelay: `${delay}ms`,
-        minHeight: '6px',
-      }}
-    />
-  );
-}
-
 export default function VoiceHandoff() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,70 +13,150 @@ export default function VoiceHandoff() {
   const recipe = allRecipes.find(r => r.id === id);
 
   const [stepIdx, setStepIdx] = useState(0);
-  const [listening, setListening] = useState(true);
+  const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [remyReply, setRemyReply] = useState('');
+  const [reply, setReply] = useState('');
   const [processing, setProcessing] = useState(false);
   const [waveBars, setWaveBars] = useState(Array(9).fill(6));
   const [showCommands, setShowCommands] = useState(false);
-  const waveRef = useRef(null);
+  const [noSupport, setNoSupport] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
-  const step = recipe?.steps[stepIdx];
+  // Refs to avoid stale closures in recognition callbacks
+  const recognitionRef = useRef(null);
+  const listeningRef = useRef(false);
+  const processingRef = useRef(false);
+  const stateRef = useRef({ stepIdx: 0, recipe: null });
+
+  // Keep stateRef in sync
+  stateRef.current = { stepIdx, recipe };
+
   const isLast = stepIdx === (recipe?.steps.length ?? 1) - 1;
 
-  // Animate waveform when listening
+  // Waveform animation
   useEffect(() => {
     if (!listening) { setWaveBars(Array(9).fill(6)); return; }
-    waveRef.current = setInterval(() => {
-      setWaveBars(prev => prev.map(() => listening ? 6 + Math.floor(Math.random() * 22) : 6));
+    const id = setInterval(() => {
+      setWaveBars(prev => prev.map(() => 6 + Math.floor(Math.random() * 22)));
     }, 150);
-    return () => clearInterval(waveRef.current);
+    return () => clearInterval(id);
   }, [listening]);
 
-  // Auto-play: speak first step on mount
-  useEffect(() => {
-    if (!recipe) return;
-    setTimeout(() => {
-      setRemyReply(`Step ${stepIdx + 1}. ${recipe.steps[stepIdx].beginner}`);
-    }, 800);
-  }, []);
+  const processCommand = (text) => {
+    const { stepIdx: idx, recipe: rec } = stateRef.current;
+    if (!rec) return;
+    const currentStep = rec.steps[idx];
+    const last = idx === rec.steps.length - 1;
 
-  if (!recipe) return null;
-
-  const handleSimCommand = (cmd) => {
-    setShowCommands(false);
-    setTranscript(cmd.replace(/"/g, ''));
+    setTranscript(text);
     setListening(false);
+    listeningRef.current = false;
     setProcessing(true);
+    processingRef.current = true;
 
     setTimeout(() => {
       setProcessing(false);
-      setListening(true);
+      processingRef.current = false;
       setTranscript('');
 
-      const lower = cmd.toLowerCase();
+      const lower = text.toLowerCase();
+
       if (lower.includes('next')) {
-        if (!isLast) {
-          const next = stepIdx + 1;
+        if (!last) {
+          const next = idx + 1;
           setStepIdx(next);
-          setRemyReply(`Step ${next + 1}. ${recipe.steps[next].beginner}`);
+          setReply(`Step ${next + 1}. ${rec.steps[next].beginner}`);
         } else {
-          setRemyReply("That's the last step! Great job. Tap 'Finish' when you're ready to rate your cook.");
+          setReply("That's the last step! Great job. Tap Finish when you're ready to rate your cook.");
         }
-      } else if (lower.includes('repeat')) {
-        setRemyReply(`Repeating step ${stepIdx + 1}. ${step.beginner}`);
-      } else if (lower.includes('timer') && step?.timerSeconds) {
-        setRemyReply(`Starting a ${Math.floor(step.timerSeconds / 60)} minute timer for ${step.timerLabel}.`);
+      } else if (lower.includes('repeat') || lower.includes('again')) {
+        setReply(`Step ${idx + 1}. ${currentStep.beginner}`);
+      } else if ((lower.includes('timer') || lower.includes('time')) && currentStep?.timerSeconds) {
+        setReply(`Starting a ${Math.floor(currentStep.timerSeconds / 60)} minute timer for ${currentStep.timerLabel}.`);
       } else if (lower.includes('need') || lower.includes('ingredient')) {
-        const items = recipe.ingredients.slice(0, 4).map(i => `${i.qty} ${i.unit} ${i.item}`.trim()).join(', ');
-        setRemyReply(`For this recipe you need: ${items}, and more. Check the recipe screen for the full list.`);
-      } else if (lower.includes('stop')) {
+        const items = rec.ingredients.slice(0, 4).map(i => `${i.qty} ${i.unit} ${i.item}`.trim()).join(', ');
+        setReply(`For this recipe you need: ${items}, and more.`);
+      } else if (lower.includes('stop') || lower.includes('exit') || lower.includes('quit')) {
         navigate(-1);
+        return;
       } else {
-        setRemyReply("I didn't catch that. Try saying 'Next step', 'Repeat that', or 'Set a timer'.");
+        setReply(`I heard "${text}" — try saying Next step, Repeat that, or Set a timer.`);
       }
-    }, 1000);
+
+      // Restart listening after processing
+      setListening(true);
+      listeningRef.current = true;
+      if (recognitionRef.current) {
+        try { recognitionRef.current.start(); } catch (e) {}
+      }
+    }, 700);
   };
+
+  // Set up SpeechRecognition once on mount
+  useEffect(() => {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) { setNoSupport(true); return; }
+
+    const rec = new SpeechRec();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    recognitionRef.current = rec;
+
+    rec.onresult = (e) => {
+      const t = Array.from(e.results).map(r => r[0].transcript).join('');
+      setTranscript(t);
+      if (e.results[e.results.length - 1].isFinal) {
+        processCommand(t);
+      }
+    };
+
+    rec.onerror = (e) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        setPermissionDenied(true);
+        setListening(false);
+        listeningRef.current = false;
+      }
+    };
+
+    rec.onend = () => {
+      // Auto-restart only if we're still in listening mode
+      if (listeningRef.current && !processingRef.current) {
+        try { rec.start(); } catch (e) {}
+      }
+    };
+
+    try {
+      rec.start();
+      setListening(true);
+      listeningRef.current = true;
+    } catch (e) {}
+
+    // Auto-read first step
+    if (recipe) {
+      setTimeout(() => {
+        setReply(`Step 1. ${recipe.steps[0].beginner}`);
+      }, 800);
+    }
+
+    return () => {
+      listeningRef.current = false;
+      try { rec.abort(); } catch (e) {}
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!recipe) return null;
+
+  // Tap-button fallback (also usable as examples)
+  const handleTapCommand = (cmd) => {
+    setShowCommands(false);
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch (e) {}
+    }
+    processCommand(cmd.replace(/"/g, ''));
+  };
+
+  const step = recipe.steps[stepIdx];
 
   return (
     <div className="min-h-full flex flex-col relative"
@@ -105,12 +172,15 @@ export default function VoiceHandoff() {
         </button>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${listening ? 'bg-terra animate-pulse' : 'bg-s3'}`} />
-          <span className="text-t2 text-xs font-semibold">{listening ? 'Little Chef is listening' : 'Processing...'}</span>
+          <span className="text-t2 text-xs font-semibold">
+            {permissionDenied ? 'Mic blocked — use buttons below' :
+             noSupport ? 'Voice not supported' :
+             processing ? 'Processing...' :
+             listening ? 'Listening...' : 'Paused'}
+          </span>
         </div>
-        <button
-          onClick={() => { navigate(`/recipes/${id}/rating`); }}
-          className="text-terra text-xs font-semibold active:opacity-70"
-        >
+        <button onClick={() => navigate(`/recipes/${id}/rating`)}
+          className="text-terra text-xs font-semibold active:opacity-70">
           Finish
         </button>
       </div>
@@ -126,7 +196,7 @@ export default function VoiceHandoff() {
         <p className="text-t3 text-xs">Step {stepIdx + 1} of {recipe.steps.length} · {recipe.title}</p>
       </div>
 
-      {/* Remy avatar + waveform */}
+      {/* Avatar + waveform */}
       <div className="flex flex-col items-center py-5 flex-shrink-0">
         <div className="relative mb-4">
           {listening && (
@@ -135,20 +205,16 @@ export default function VoiceHandoff() {
               <div className="absolute inset-0 rounded-full bg-terra/8 animate-ping scale-150" style={{ animationDelay: '0.4s' }} />
             </>
           )}
-          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center
-            transition-all duration-300
-            ${listening
-              ? 'bg-terra shadow-[0_0_32px_rgba(212,101,74,0.6)]'
-              : 'bg-s2 border border-s3'}`}>
+          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300
+            ${listening ? 'bg-terra shadow-[0_0_32px_rgba(212,101,74,0.6)]' : 'bg-s2 border border-s3'}`}>
             <span className="text-3xl">👨‍🍳</span>
           </div>
         </div>
 
-        {/* Live waveform */}
+        {/* Waveform */}
         <div className="flex items-center gap-1 h-10">
           {waveBars.map((h, i) => (
-            <div
-              key={i}
+            <div key={i}
               className={`w-1.5 rounded-full transition-all duration-150 ${listening ? 'bg-terra' : 'bg-s3'}`}
               style={{ height: `${h}px` }}
             />
@@ -164,16 +230,21 @@ export default function VoiceHandoff() {
         {transcript && !processing && (
           <p className="text-t3 text-xs mt-2 italic">"{transcript}"</p>
         )}
+        {permissionDenied && (
+          <p className="text-danger text-[10px] mt-2 text-center px-6">
+            Microphone access was blocked. Enable it in your browser settings, or use the buttons below.
+          </p>
+        )}
       </div>
 
-      {/* Remy's current step card */}
+      {/* Reply card */}
       <div className="flex-1 px-5 overflow-y-auto scrollbar-none">
-        {remyReply && (
+        {reply && (
           <div className="bg-s1 border border-s3 rounded-2xl rounded-tl-sm px-4 py-4 mb-4 animate-fade-in">
             <p className="text-terra text-xs font-bold mb-2 flex items-center gap-1.5">
               <span>👨‍🍳</span> Little Chef
             </p>
-            <p className="text-t1 text-sm leading-relaxed">{remyReply}</p>
+            <p className="text-t1 text-sm leading-relaxed">{reply}</p>
             {step?.timerSeconds && (
               <div className="mt-3 flex items-center gap-2 bg-terra/10 rounded-xl px-3 py-2">
                 <span className="text-terra text-xs">⏱</span>
@@ -181,7 +252,7 @@ export default function VoiceHandoff() {
                   {step.timerLabel} — {Math.floor(step.timerSeconds / 60)} min
                 </span>
                 <button
-                  onClick={() => handleSimCommand('"Set a timer"')}
+                  onClick={() => handleTapCommand('"Set a timer"')}
                   className="ml-auto text-terra text-[10px] font-bold border border-terra/30 rounded-full px-2 py-0.5 active:bg-terra/20">
                   Start
                 </button>
@@ -190,12 +261,14 @@ export default function VoiceHandoff() {
           </div>
         )}
 
-        {/* Voice commands hint */}
+        {/* Voice commands (examples + tap fallback) */}
         <button
           onClick={() => setShowCommands(v => !v)}
           className="w-full flex items-center justify-between bg-s1 border border-s3 rounded-xl px-4 py-3 mb-3"
         >
-          <span className="text-t2 text-xs font-semibold">Voice commands</span>
+          <span className="text-t2 text-xs font-semibold">
+            {noSupport || permissionDenied ? 'Tap a command' : 'Voice commands (or tap)'}
+          </span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6D6D72" strokeWidth="2.5" strokeLinecap="round"
             style={{ transform: showCommands ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
             <polyline points="6 9 12 15 18 9"/>
@@ -205,12 +278,9 @@ export default function VoiceHandoff() {
         {showCommands && (
           <div className="flex flex-col gap-2 mb-4 animate-fade-in">
             {VOICE_COMMANDS.map(cmd => (
-              <button
-                key={cmd}
-                onClick={() => handleSimCommand(cmd)}
+              <button key={cmd} onClick={() => handleTapCommand(cmd)}
                 className="flex items-center gap-3 bg-s1 border border-s3 rounded-xl px-4 py-3
-                  active:bg-s2 transition-colors text-left"
-              >
+                  active:bg-s2 transition-colors text-left">
                 <span className="text-terra text-sm">🎙</span>
                 <span className="text-t1 text-sm font-medium">{cmd}</span>
               </button>
@@ -219,21 +289,19 @@ export default function VoiceHandoff() {
         )}
       </div>
 
-      {/* Bottom action */}
+      {/* Bottom actions */}
       <div className="flex-shrink-0 px-5 py-4 border-t border-s3/50">
         <div className="flex gap-3">
           <button
-            onClick={() => handleSimCommand('"Repeat that"')}
+            onClick={() => handleTapCommand('"Repeat that"')}
             className="flex-1 bg-s2 border border-s3 rounded-xl py-3.5 text-t2 text-sm font-semibold
-              active:scale-95 transition-transform"
-          >
+              active:scale-95 transition-transform">
             ↩ Repeat
           </button>
           <button
-            onClick={() => handleSimCommand(isLast ? '"Stop cooking"' : '"Next step"')}
+            onClick={() => handleTapCommand(isLast ? '"Stop cooking"' : '"Next step"')}
             className="flex-[2] bg-terra text-white rounded-xl py-3.5 font-semibold text-sm
-              active:scale-95 transition-transform shadow-[0_0_16px_rgba(212,101,74,0.35)]"
-          >
+              active:scale-95 transition-transform shadow-[0_0_16px_rgba(212,101,74,0.35)]">
             {isLast ? '✓ Finish' : 'Next step →'}
           </button>
         </div>
