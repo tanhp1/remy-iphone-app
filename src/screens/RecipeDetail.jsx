@@ -284,19 +284,22 @@ export default function RecipeDetail() {
 
       {/* Sticky CTA */}
       <div className="absolute bottom-16 left-0 right-0 px-4 py-3 bg-bg/90 backdrop-blur-sm border-t border-s3">
-        <button
-          onClick={() => navigate(`/recipes/${id}/voice`)}
-          className="w-full bg-terra text-white rounded-xl py-4 font-semibold text-base
-            active:scale-98 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)]"
-        >
-          Start Cooking →
-        </button>
-        <p
-          onClick={() => navigate(`/recipes/${id}/cook`)}
-          className="text-center text-t3 text-xs mt-2 cursor-pointer underline active:text-t2"
-        >
-          Free mode (no voice)
-        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate(`/recipes/${id}/voice`)}
+            className="flex-1 bg-s2 border border-s3 text-t1 rounded-xl py-3.5 font-semibold text-sm
+              active:scale-95 transition-transform flex items-center justify-center gap-1.5"
+          >
+            <span>🎙</span> Voice
+          </button>
+          <button
+            onClick={() => navigate(`/recipes/${id}/cook`)}
+            className="flex-[2] bg-terra text-white rounded-xl py-3.5 font-semibold text-base
+              active:scale-95 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)]"
+          >
+            Start Cooking →
+          </button>
+        </div>
       </div>
 
       {/* Tweak sheet */}
