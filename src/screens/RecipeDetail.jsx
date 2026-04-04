@@ -3,6 +3,47 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import BottomSheet from '../components/BottomSheet';
 
+// Scale a qty string by a ratio, returning a clean formatted string
+function scaleQty(qtyStr, ratio) {
+  if (!qtyStr || ratio === 1) return qtyStr;
+  // Extract leading number (int or decimal), keep any trailing non-numeric suffix (e.g. "300g" → 300, "g")
+  const match = String(qtyStr).match(/^([\d.\/]+)(.*)/);
+  if (!match) return qtyStr;
+
+  let num;
+  if (match[1].includes('/')) {
+    // Handle fractions like "1/2"
+    const [n, d] = match[1].split('/');
+    num = parseFloat(n) / parseFloat(d);
+  } else {
+    num = parseFloat(match[1]);
+  }
+  if (isNaN(num)) return qtyStr;
+
+  const scaled = num * ratio;
+
+  // Format: prefer clean fractions for small values, integers when whole, 1 decimal otherwise
+  const FRACTIONS = [
+    [0.25, '¼'], [0.33, '⅓'], [0.5, '½'], [0.67, '⅔'], [0.75, '¾'],
+  ];
+  const whole = Math.floor(scaled);
+  const frac = scaled - whole;
+  let formatted;
+
+  if (frac < 0.05) {
+    formatted = String(whole === 0 ? scaled.toFixed(1).replace(/\.0$/, '') : whole);
+  } else {
+    const fracMatch = FRACTIONS.find(([v]) => Math.abs(frac - v) < 0.07);
+    if (fracMatch) {
+      formatted = whole > 0 ? `${whole}${fracMatch[1]}` : fracMatch[1];
+    } else {
+      formatted = scaled < 10 ? parseFloat(scaled.toFixed(1)).toString() : Math.round(scaled).toString();
+    }
+  }
+
+  return formatted + match[2]; // re-attach suffix like "g", "ml" etc.
+}
+
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,6 +62,7 @@ export default function RecipeDetail() {
 
   const isTweaked = tweakedRecipes.has(id);
   const servings = servingsOverride[id] ?? recipe.servings;
+  const ratio = servings / recipe.servings;
   const inPantryCount = recipe.ingredients.filter(i => i.inPantry).length;
   const pantryPct = Math.round((inPantryCount / recipe.ingredients.length) * 100);
   const missingIngredients = recipe.ingredients.filter(i => !i.inPantry && !(i.isNew && !isTweaked));
@@ -150,7 +192,7 @@ export default function RecipeDetail() {
                 </div>
                 <div className="flex-1">
                   <span className={`text-sm font-medium ${ing.inPantry ? 'text-t1' : 'text-t3'}`}>
-                    {ing.qty} {ing.unit} {ing.item}
+                    {scaleQty(ing.qty, ratio)} {ing.unit} {ing.item}
                   </span>
                   {showNew && <p className="text-amber text-[10px] font-semibold mt-0.5">Added by Remy ✨</p>}
                 </div>
