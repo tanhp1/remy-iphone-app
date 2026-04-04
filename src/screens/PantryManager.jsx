@@ -243,12 +243,34 @@ export default function PantryManager() {
             </div>
 
             {scanning && (
-              <div className="mx-5 my-3 bg-s1 border border-s3 rounded-xl overflow-hidden relative h-20">
-                <div className="absolute inset-0 flex items-center justify-center gap-2">
-                  <span className="text-t3 text-sm">Scanning fridge contents</span>
-                  <span className="w-4 h-4 border-2 border-s3 border-t-terra rounded-full animate-spin" />
+              <div className="mx-5 my-3 rounded-2xl overflow-hidden relative bg-black" style={{ height: 140 }}>
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/60" />
+                {/* Corner brackets */}
+                {[['top-3 left-3','border-t-2 border-l-2'],['top-3 right-3','border-t-2 border-r-2'],
+                  ['bottom-3 left-3','border-b-2 border-l-2'],['bottom-3 right-3','border-b-2 border-r-2']
+                ].map(([pos, border], i) => (
+                  <div key={i} className={`absolute ${pos} w-5 h-5 border-terra ${border}`} />
+                ))}
+                {/* Scanning laser */}
+                <div className="absolute left-4 right-4 h-0.5 bg-terra/80 shadow-[0_0_8px_rgba(212,101,74,0.8)]"
+                  style={{ animation: 'scanLine 1.4s ease-in-out infinite', top: '50%' }} />
+                {/* Detected items */}
+                <div className="absolute inset-x-4 bottom-3 flex gap-2">
+                  {[['🥩','Chicken'],['🧄','Garlic'],['🧅','Onion']].map(([emoji, name], i) => (
+                    <div key={i} className="bg-terra/20 border border-terra/40 rounded-lg px-2 py-1 flex items-center gap-1"
+                      style={{ animation: `fadeInScale 0.3s ease ${i * 0.45 + 0.5}s both` }}>
+                      <span className="text-sm">{emoji}</span>
+                      <span className="text-terra text-[10px] font-bold">{name}</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="absolute left-0 right-0 h-px bg-terra/60 animate-bounce top-1/2" />
+                <p className="absolute top-3 left-0 right-0 text-center text-white/80 text-xs font-semibold tracking-wide">
+                  Scanning fridge contents...
+                </p>
+                <style>{`
+                  @keyframes scanLine { 0%,100% { top:18%; } 50% { top:72%; } }
+                  @keyframes fadeInScale { from { opacity:0; transform:scale(0.7); } to { opacity:1; transform:scale(1); } }
+                `}</style>
               </div>
             )}
             {scanDone && (

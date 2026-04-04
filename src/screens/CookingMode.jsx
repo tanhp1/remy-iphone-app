@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { ASK_REMY_RESPONSES } from '../data/mockResponses';
+import { ASK_REMY_RESPONSES, getStepContextResponse } from '../data/mockResponses';
 import TimerBanner from '../components/TimerBanner';
 import BottomSheet from '../components/BottomSheet';
 
@@ -88,9 +88,20 @@ export default function CookingMode() {
   const handleAsk = () => {
     setAskLoading(true);
     setTimeout(() => {
-      const lower = askInput.toLowerCase();
-      const key = Object.keys(ASK_REMY_RESPONSES).find(k => k !== 'default' && lower.includes(k));
-      setAskResponse(ASK_REMY_RESPONSES[key ?? 'default']);
+      const lower = askInput.trim().toLowerCase();
+      // 1. If empty, give a contextual response about this specific step
+      if (!lower) {
+        setAskResponse(getStepContextResponse(step.beginner, stepIdx));
+      } else {
+        // 2. Keyword match against freeform responses
+        const key = Object.keys(ASK_REMY_RESPONSES).find(k => k !== 'default' && lower.includes(k));
+        if (key) {
+          setAskResponse(ASK_REMY_RESPONSES[key]);
+        } else {
+          // 3. Fall back to step-aware contextual response
+          setAskResponse(getStepContextResponse(step.beginner, stepIdx));
+        }
+      }
       setAskLoading(false);
     }, 800);
   };
@@ -229,13 +240,13 @@ export default function CookingMode() {
           <input
             value={askInput}
             onChange={e => setAskInput(e.target.value)}
-            placeholder={`e.g. "How do I know it's done?"`}
+            placeholder={`Ask about this step, or leave blank for a tip`}
             className="bg-s2 border border-s3 rounded-xl px-4 py-3 text-t1 text-sm placeholder-t3
               focus:border-terra outline-none"
           />
           <button
             onClick={handleAsk}
-            disabled={!askInput.trim() || askLoading}
+            disabled={askLoading}
             className="bg-terra text-white rounded-xl py-3 font-semibold text-sm active:scale-95 transition-transform disabled:opacity-50"
           >
             {askLoading ? (

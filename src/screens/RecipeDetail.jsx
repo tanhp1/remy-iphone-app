@@ -89,15 +89,41 @@ export default function RecipeDetail() {
   return (
     <div className="bg-bg min-h-full pb-28">
       {/* Hero */}
-      <div className="relative h-52 flex items-end" style={{ backgroundColor: recipe.color }}>
+      <div className="relative flex items-end" style={{ backgroundColor: recipe.color, minHeight: recipe.isChefRecipe ? '224px' : '208px' }}>
         <div className="absolute inset-0 bg-black/20" />
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-7xl drop-shadow-xl">{recipe.emoji}</span>
         </div>
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.75) 100%)' }} />
+
+        {/* Chef badge */}
+        {recipe.isChefRecipe && (
+          <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-terra text-white
+            text-[11px] font-bold px-3 py-1.5 rounded-full shadow-[0_0_12px_rgba(212,101,74,0.5)]">
+            <span>👨‍🍳</span> Chef's Recipe
+          </div>
+        )}
+
         <div className="relative z-10 px-5 pb-4 w-full">
           <h1 className="font-serif text-2xl font-bold text-white leading-tight">{recipe.title}</h1>
+          {/* Chef star rating in hero */}
+          {recipe.rating && (
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} width="11" height="11" viewBox="0 0 24 24"
+                    fill={i <= Math.round(recipe.rating.overall) ? '#FFD700' : 'none'}
+                    stroke="#FFD700" strokeWidth="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                ))}
+              </div>
+              <span className="text-white/90 text-xs font-bold">{recipe.rating.overall.toFixed(1)}</span>
+              {recipe.rating.count && <span className="text-white/60 text-[10px]">({recipe.rating.count.toLocaleString()} ratings)</span>}
+            </div>
+          )}
         </div>
+
         {/* Back */}
         <button
           onClick={() => navigate(-1)}
@@ -109,6 +135,14 @@ export default function RecipeDetail() {
           </svg>
         </button>
       </div>
+
+      {/* Chef note banner */}
+      {recipe.isChefRecipe && recipe.chefNote && (
+        <div className="mx-4 mt-3 bg-[rgba(212,101,74,0.08)] border border-terra/25 rounded-xl px-4 py-3">
+          <p className="text-terra text-xs font-bold mb-1">👨‍🍳 A note from {recipe.chefName}</p>
+          <p className="text-t2 text-sm leading-relaxed italic">"{recipe.chefNote}"</p>
+        </div>
+      )}
 
       {/* Metadata row */}
       <div className="bg-s1 border-b border-s3 px-5 py-3 flex items-center gap-4">
