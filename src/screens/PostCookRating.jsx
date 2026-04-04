@@ -56,7 +56,7 @@ export default function PostCookRating() {
       <div className="text-7xl animate-bounce">🎉</div>
       <h2 className="font-serif text-2xl font-bold text-t1">Nice cook!</h2>
       <p className="text-t2 text-sm">
-        {stars >= 4 ? `${recipe.title} is going in your favorites.` : 'Your feedback helps Remy improve.'}
+        {stars >= 4 ? `${recipe.title} is going in your favorites.` : 'Your feedback helps Little Chef improve.'}
       </p>
       <div className="flex gap-0.5 mt-1">
         {[1,2,3,4,5].map(s => (

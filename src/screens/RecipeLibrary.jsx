@@ -16,7 +16,7 @@ const ADD_OPTIONS = [
   { icon: '📎', label: 'Import from URL',    sub: 'Paste a link from any recipe site' },
   { icon: '📷', label: 'Scan a recipe card', sub: 'Take a photo of a recipe'          },
   { icon: '✏️', label: 'Enter manually',      sub: 'Type ingredients and steps'        },
-  { icon: '✨', label: 'Remy Original (AI)',  sub: 'Let Remy create a recipe for you'  },
+  { icon: '✨', label: 'Little Chef Original (AI)',  sub: 'Let Little Chef create a recipe for you'  },
 ];
 
 export default function RecipeLibrary() {

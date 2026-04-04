@@ -129,10 +129,10 @@ export default function CookingMode() {
                   style={{ height: `${h * 4}px`, animationDelay: `${i * 80}ms` }} />
               ))}
             </span>
-            <span className="text-terra text-xs font-semibold">Remy is listening · tap to mute</span>
+            <span className="text-terra text-xs font-semibold">Little Chef is listening · tap to mute</span>
           </>
         ) : (
-          <span className="text-t3 text-xs font-semibold">Remy is muted · tap to unmute</span>
+          <span className="text-t3 text-xs font-semibold">Little Chef is muted · tap to unmute</span>
         )}
       </button>
 
@@ -168,7 +168,7 @@ export default function CookingMode() {
         {/* Tweaked banner */}
         {step.isTweaked && isTweaked && (
           <div className="bg-[rgba(255,159,10,0.1)] border border-amber/25 rounded-xl px-4 py-2.5 mb-4 animate-fade-in">
-            <p className="text-amber text-xs font-semibold">✨ Tweaked by Remy — chili flakes added for heat</p>
+            <p className="text-amber text-xs font-semibold">✨ Tweaked by Little Chef — chili flakes added for heat</p>
           </div>
         )}
 
@@ -194,13 +194,13 @@ export default function CookingMode() {
           </div>
         )}
 
-        {/* Ask Remy */}
+        {/* Ask Little Chef */}
         <button
           onClick={() => { setAskOpen(true); setAskResponse(''); setAskInput(''); }}
           className="w-full border border-s3 rounded-xl py-3 text-t2 text-sm font-medium
             active:bg-s2 transition-colors mb-4"
         >
-          🤔 Ask Remy about this step
+          🤔 Ask Little Chef about this step
         </button>
 
         {/* Nav buttons */}
@@ -234,8 +234,8 @@ export default function CookingMode() {
         />
       )}
 
-      {/* Ask Remy sheet */}
-      <BottomSheet isOpen={askOpen} onClose={() => setAskOpen(false)} title="Ask Remy">
+      {/* Ask Little Chef sheet */}
+      <BottomSheet isOpen={askOpen} onClose={() => setAskOpen(false)} title="Ask Little Chef">
         <div className="p-4 flex flex-col gap-3">
           <input
             value={askInput}
@@ -258,7 +258,7 @@ export default function CookingMode() {
           </button>
           {askResponse && (
             <div className="bg-s2 border border-s3 rounded-2xl rounded-tl-sm px-4 py-3 animate-fade-in">
-              <p className="text-terra text-xs font-bold mb-1">🤖 Remy</p>
+              <p className="text-terra text-xs font-bold mb-1">🤖 Little Chef</p>
               <p className="text-t1 text-sm leading-relaxed">{askResponse}</p>
             </div>
           )}

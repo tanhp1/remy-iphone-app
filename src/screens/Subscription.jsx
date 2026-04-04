@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 const TIERS = [
   {
     id: 'free',
-    name: 'Remy Starter',
+    name: 'Little Chef Starter',
     price: '$0',
     period: 'forever',
     color: '#6D6D72',
@@ -24,7 +24,7 @@ const TIERS = [
   },
   {
     id: 'basic',
-    name: 'Remy Home',
+    name: 'Little Chef Home',
     price: '$4.99',
     period: 'per month',
     color: '#D4654A',
@@ -44,19 +44,19 @@ const TIERS = [
   },
   {
     id: 'premium',
-    name: 'Remy Pro',
+    name: 'Little Chef Pro',
     price: '$9.99',
     period: 'per month',
     color: '#B8860B',
     badge: '✨ Pro',
-    tagline: 'The full Remy experience',
+    tagline: 'The full Little Chef experience',
     features: [
       'Everything in Basic',
       'Full voice + hands-free nav',
       'Chef recipe collection',
       'Upload unlimited recipes',
       'Priority AI responses',
-      'Remy Pro badge',
+      'Little Chef Pro badge',
       'Early access to new features',
     ],
     limitations: [],
@@ -82,7 +82,7 @@ export default function Subscription() {
   const actionLabel = () => {
     const sel = TIERS.find(t => t.id === selected);
     if (selected === currentTier) return 'Current plan';
-    if (selected === 'free') return 'Switch to Remy Starter';
+    if (selected === 'free') return 'Switch to Little Chef Starter';
     return `Upgrade to ${sel.name} — ${sel.price}/mo`;
   };
 
@@ -97,7 +97,7 @@ export default function Subscription() {
         </button>
         <div>
           <h1 className="font-serif text-xl font-bold text-t1">Choose Your Plan</h1>
-          <p className="text-t3 text-xs">Cook smarter with Remy Pro</p>
+          <p className="text-t3 text-xs">Cook smarter with Little Chef Pro</p>
         </div>
       </div>
 

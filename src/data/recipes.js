@@ -240,10 +240,10 @@ export const RECIPES = [
   },
   {
     id: 'r8',
-    title: "Chef Remy's Ratatouille",
+    title: "Little Chef's Ratatouille",
     source: 'Chef',
     isChefRecipe: true,
-    chefName: 'Chef Remy',
+    chefName: 'Little Chef',
     cuisine: 'French',
     prepTime: 40,
     cookTime: 90,

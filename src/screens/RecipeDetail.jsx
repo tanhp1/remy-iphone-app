@@ -80,7 +80,7 @@ export default function RecipeDetail() {
       setTweakLoading(false);
       setSheetOpen(false);
       applyTweak(id);
-      addToast('Remy added chili flakes and updated step 3', 'success');
+      addToast('Little Chef added chili flakes and updated step 3', 'success');
     }, 1200);
   };
 
@@ -228,7 +228,7 @@ export default function RecipeDetail() {
                   <span className={`text-sm font-medium ${ing.inPantry ? 'text-t1' : 'text-t3'}`}>
                     {scaleQty(ing.qty, ratio)} {ing.unit} {ing.item}
                   </span>
-                  {showNew && <p className="text-amber text-[10px] font-semibold mt-0.5">Added by Remy ✨</p>}
+                  {showNew && <p className="text-amber text-[10px] font-semibold mt-0.5">Added by Little Chef ✨</p>}
                 </div>
                 {!ing.inPantry && !showNew && (
                   <span className="text-terra text-xs font-medium">+ Add</span>
@@ -260,7 +260,7 @@ export default function RecipeDetail() {
               <div className="flex-1 pt-0.5">
                 {step.isTweaked && isTweaked && (
                   <div className="bg-[rgba(255,159,10,0.12)] border border-amber/25 rounded-lg px-3 py-2 mb-2">
-                    <p className="text-amber text-xs font-semibold">✨ Tweaked by Remy — chili flakes added for heat</p>
+                    <p className="text-amber text-xs font-semibold">✨ Tweaked by Little Chef — chili flakes added for heat</p>
                   </div>
                 )}
                 <p className="text-t1 text-base leading-relaxed">{stepText(step)}</p>
@@ -302,7 +302,7 @@ export default function RecipeDetail() {
       {/* Tweak sheet */}
       <BottomSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} title="Tweak this recipe">
         <div className="p-4 flex flex-col gap-4">
-          <p className="text-t2 text-sm">Tell Remy how you'd like to change this recipe:</p>
+          <p className="text-t2 text-sm">Tell Little Chef how you'd like to change this recipe:</p>
           <textarea
             value={tweakInput}
             onChange={e => setTweakInput(e.target.value)}
@@ -320,7 +320,7 @@ export default function RecipeDetail() {
             {tweakLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Remy is tweaking...
+                Little Chef is tweaking...
               </span>
             ) : 'Apply Tweak'}
           </button>

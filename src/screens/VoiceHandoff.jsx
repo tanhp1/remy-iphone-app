@@ -105,7 +105,7 @@ export default function VoiceHandoff() {
         </button>
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${listening ? 'bg-terra animate-pulse' : 'bg-s3'}`} />
-          <span className="text-t2 text-xs font-semibold">{listening ? 'Remy is listening' : 'Processing...'}</span>
+          <span className="text-t2 text-xs font-semibold">{listening ? 'Little Chef is listening' : 'Processing...'}</span>
         </div>
         <button
           onClick={() => { navigate(`/recipes/${id}/rating`); }}
@@ -171,7 +171,7 @@ export default function VoiceHandoff() {
         {remyReply && (
           <div className="bg-s1 border border-s3 rounded-2xl rounded-tl-sm px-4 py-4 mb-4 animate-fade-in">
             <p className="text-terra text-xs font-bold mb-2 flex items-center gap-1.5">
-              <span>👨‍🍳</span> Remy
+              <span>👨‍🍳</span> Little Chef
             </p>
             <p className="text-t1 text-sm leading-relaxed">{remyReply}</p>
             {step?.timerSeconds && (

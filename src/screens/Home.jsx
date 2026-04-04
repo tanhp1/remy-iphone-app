@@ -62,10 +62,10 @@ function VoiceButton() {
       {listening ? (
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-terra animate-pulse" />
-          <p className="text-xs font-semibold text-terra">Remy is listening</p>
+          <p className="text-xs font-semibold text-terra">Little Chef is listening</p>
         </div>
       ) : (
-        <p className="text-xs font-semibold text-t3">Ask Remy</p>
+        <p className="text-xs font-semibold text-t3">Ask Little Chef</p>
       )}
     </div>
   );
@@ -165,7 +165,7 @@ export default function Home() {
         {/* Wordmark */}
         <div className="flex items-center gap-1.5">
           <span className="text-lg">👨‍🍳</span>
-          <span className="font-serif text-t1 font-bold text-lg tracking-tight">Remy</span>
+          <span className="font-serif text-t1 font-bold text-lg tracking-tight">Little Chef</span>
         </div>
         {/* User avatar */}
         <div className="w-10 h-10 rounded-full bg-terra flex items-center justify-center
@@ -236,7 +236,7 @@ export default function Home() {
           <div className="flex-[2] flex flex-col items-center gap-2">
             <VoiceButton />
             <div className="text-center">
-              <p className="text-t1 text-xs font-semibold">Ask Remy</p>
+              <p className="text-t1 text-xs font-semibold">Ask Little Chef</p>
               <p className="text-t3 text-[10px] mt-0.5">Hands-free AI assistant</p>
             </div>
           </div>

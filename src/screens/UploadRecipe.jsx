@@ -96,7 +96,7 @@ export default function UploadRecipe() {
           <div className="text-7xl mb-4">🎉</div>
           <h2 className="font-serif text-2xl font-bold text-t1 mb-2">Recipe Submitted!</h2>
           <p className="text-t2 text-sm leading-relaxed">
-            <strong className="text-terra">{form.title}</strong> has been submitted to the Remy community.
+            <strong className="text-terra">{form.title}</strong> has been submitted to the Little Chef community.
             It'll go live after a quick review.
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function UploadRecipe() {
         </button>
         <div>
           <h1 className="font-serif text-xl font-bold text-t1">Upload Recipe</h1>
-          <p className="text-t3 text-xs">Share with the Remy community</p>
+          <p className="text-t3 text-xs">Share with the Little Chef community</p>
         </div>
       </div>
 

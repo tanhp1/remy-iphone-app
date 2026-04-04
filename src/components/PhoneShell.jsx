@@ -61,7 +61,7 @@ function SplashScreen() {
           <span className="text-white text-sm font-bold">✨</span>
         </div>
       </div>
-      <p className="font-serif text-3xl font-bold text-t1 tracking-tight mb-1">Remy</p>
+      <p className="font-serif text-3xl font-bold text-t1 tracking-tight mb-1">Little Chef</p>
       <p className="text-t3 text-xs font-medium">AI Cooking Assistant</p>
       <div className="absolute bottom-12 flex gap-1.5">
         {[0,1,2].map(i => (

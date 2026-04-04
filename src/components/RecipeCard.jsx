@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import TagPill from './TagPill';
 
 const SOURCE_COLORS = {
-  'Remy Original': 'bg-terra',
+  'Little Chef Original': 'bg-terra',
   'Imported':      'bg-sage-dark',
   'Family Recipe': 'bg-amber',
 };

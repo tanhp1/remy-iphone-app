@@ -60,13 +60,13 @@ export default function Onboarding() {
       </div>
 
       <h1 className="font-serif text-3xl font-bold text-t1 mb-3 leading-tight">
-        Meet Remy
+        Meet Little Chef
       </h1>
       <p className="text-t2 text-base leading-relaxed mb-2">
         Your personal AI cooking assistant.
       </p>
       <p className="text-t3 text-sm leading-relaxed mb-10 max-w-xs">
-        Inspired by the belief that <span className="text-terra font-semibold">anyone can cook</span> — Remy helps you make amazing meals with what you already have.
+        Inspired by the belief that <span className="text-terra font-semibold">anyone can cook</span> — Little Chef helps you make amazing meals with what you already have.
       </p>
 
       <button
@@ -91,7 +91,7 @@ export default function Onboarding() {
         </div>
         <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 1 of 3</p>
         <h2 className="font-serif text-2xl font-bold text-t1 mb-2">What's your cooking level?</h2>
-        <p className="text-t2 text-sm">Remy adjusts its guidance based on your experience.</p>
+        <p className="text-t2 text-sm">Little Chef adjusts its guidance based on your experience.</p>
       </div>
 
       <div className="flex flex-col gap-3 mt-8 flex-1">
@@ -142,7 +142,7 @@ export default function Onboarding() {
         </div>
         <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 2 of 3</p>
         <h2 className="font-serif text-2xl font-bold text-t1 mb-2">Any dietary preferences?</h2>
-        <p className="text-t2 text-sm">Remy will filter and personalize every recipe to match.</p>
+        <p className="text-t2 text-sm">Little Chef will filter and personalize every recipe to match.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mt-8 flex-1">
@@ -183,7 +183,7 @@ export default function Onboarding() {
         </div>
         <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 3 of 3</p>
         <h2 className="font-serif text-2xl font-bold text-t1 mb-2">What's in your kitchen?</h2>
-        <p className="text-t2 text-sm">Tap the staples you usually have. Remy will match recipes instantly.</p>
+        <p className="text-t2 text-sm">Tap the staples you usually have. Little Chef will match recipes instantly.</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mt-6 flex-1 content-start">

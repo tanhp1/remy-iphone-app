@@ -19,7 +19,7 @@ export default function Profile() {
         <p className="text-t2 text-sm">{user.skillLevel} · {user.dietaryLifestyle}</p>
         {user.isPro ? (
           <span className="mt-2 bg-terra/20 text-terra text-xs font-bold px-3 py-1 rounded-full border border-terra/30">
-            ✨ Remy Pro
+            ✨ Little Chef Pro
           </span>
         ) : (
           <span className="mt-2 bg-s2 text-t3 text-xs font-bold px-3 py-1 rounded-full border border-s3">
@@ -36,12 +36,12 @@ export default function Profile() {
             ${user.isPro
               ? 'bg-terra/15 text-terra border-terra/30'
               : 'bg-s2 text-t3 border-s3'}`}>
-            {user.isPro ? 'Remy Pro' : 'Remy Starter'}
+            {user.isPro ? 'Little Chef Pro' : 'Little Chef Starter'}
           </span>
         </div>
         {!user.isPro && (
           <p className="text-t3 text-xs mb-3 leading-relaxed">
-            Unlock AI tweaks, voice navigation, chef recipes and more with Remy Pro.
+            Unlock AI tweaks, voice navigation, chef recipes and more with Little Chef Pro.
           </p>
         )}
         <div className="flex gap-2">
