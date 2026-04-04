@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { MY_RECIPES } from '../data/recipes';
@@ -156,6 +156,12 @@ export default function Home() {
   const { user, pantry } = useApp();
   const effectivePantry = pantry.length ? pantry : PANTRY_INITIAL;
   const rankedRecipes = getPantryMatches(MY_RECIPES, effectivePantry);
+  const scrollRef = useRef(null);
+
+  const scroll = (dir) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * 220, behavior: 'smooth' });
+  };
 
   return (
     <div className="bg-bg min-h-full flex flex-col relative overflow-hidden" style={{ minHeight: '100%' }}>
@@ -195,12 +201,34 @@ export default function Home() {
       </div>
 
       {/* ── Recipe cards (horizontal scroll) ── */}
-      <div className="flex-1 overflow-hidden">
-        <div className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-4 h-full items-start">
+      <div className="flex-1 overflow-hidden relative">
+        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-4 h-full items-start">
           {rankedRecipes.map(r => (
             <PantryRecipeCard key={r.id} recipe={r} />
           ))}
         </div>
+        {/* Left arrow */}
+        <button
+          onClick={() => scroll(-1)}
+          className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full
+            bg-black/30 backdrop-blur-sm flex items-center justify-center
+            active:scale-90 transition-transform z-10"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        {/* Right arrow */}
+        <button
+          onClick={() => scroll(1)}
+          className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full
+            bg-black/30 backdrop-blur-sm flex items-center justify-center
+            active:scale-90 transition-transform z-10"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
       </div>
 
       {/* ── Expiring soon nudge ── */}
