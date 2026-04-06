@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import BottomSheet from '../components/BottomSheet';
 
 // Scale a qty string by a ratio, returning a clean formatted string
 function scaleQty(qtyStr, ratio) {
@@ -50,9 +48,6 @@ export default function RecipeDetail() {
   const { allRecipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast, addGroceryItems, groceryList } = useApp();
 
   const recipe = allRecipes.find(r => r.id === id);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [tweakInput, setTweakInput] = useState('');
-  const [tweakLoading, setTweakLoading] = useState(false);
 
   if (!recipe) return (
     <div className="bg-bg min-h-full flex items-center justify-center">
@@ -75,13 +70,8 @@ export default function RecipeDetail() {
   };
 
   const handleApplyTweak = () => {
-    setTweakLoading(true);
-    setTimeout(() => {
-      setTweakLoading(false);
-      setSheetOpen(false);
-      applyTweak(id);
-      addToast('Little Chef added chili flakes and updated step 3', 'success');
-    }, 1200);
+    applyTweak(id);
+    addToast('Little Chef added chili flakes and updated step 3', 'success');
   };
 
   const stepText = (step) => user.skillLevel === 'Beginner' ? step.beginner : step.beginner;
@@ -104,7 +94,7 @@ export default function RecipeDetail() {
             </div>
           )}
           <button
-            onClick={() => setSheetOpen(true)}
+            onClick={handleApplyTweak}
             className="flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full active:scale-90 transition-transform"
           >
             ✨ Tweak
@@ -288,34 +278,6 @@ export default function RecipeDetail() {
       </div>
 
 
-      {/* Tweak sheet */}
-      <BottomSheet isOpen={sheetOpen} onClose={() => setSheetOpen(false)} title="Tweak this recipe">
-        <div className="p-4 flex flex-col gap-4">
-          <p className="text-t2 text-sm">Tell Little Chef how you'd like to change this recipe:</p>
-          <textarea
-            value={tweakInput}
-            onChange={e => setTweakInput(e.target.value)}
-            rows={3}
-            placeholder="e.g. Make it spicier, reduce sodium, scale to 6..."
-            className="bg-s2 border border-s3 rounded-xl px-4 py-3 text-t1 text-sm placeholder-t3
-              focus:border-terra focus:ring-1 focus:ring-terra/30 outline-none resize-none"
-          />
-          <button
-            onClick={handleApplyTweak}
-            disabled={tweakLoading}
-            className="w-full bg-terra text-white rounded-xl py-3.5 font-semibold text-base
-              active:scale-95 transition-transform disabled:opacity-60"
-          >
-            {tweakLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Little Chef is tweaking...
-              </span>
-            ) : 'Apply Tweak'}
-          </button>
-          <div className="h-2" />
-        </div>
-      </BottomSheet>
     </div>
   );
 }
