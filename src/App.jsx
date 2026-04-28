@@ -8,10 +8,9 @@ import RecipeDetail from './screens/RecipeDetail';
 import CookingMode from './screens/CookingMode';
 import VoiceHandoff from './screens/VoiceHandoff';
 import PostCookRating from './screens/PostCookRating';
-import PantryManager from './screens/PantryManager';
+import StartCooking from './screens/StartCooking';
+import ImportRecipe from './screens/ImportRecipe';
 import Profile from './screens/Profile';
-import Discover from './screens/Discover';
-import UploadRecipe from './screens/UploadRecipe';
 import Subscription from './screens/Subscription';
 
 function AppRoutes() {
@@ -51,10 +50,9 @@ function AppRoutes() {
         <Route path="recipes/:id/cook" element={<CookingMode />} />
         <Route path="recipes/:id/voice" element={<VoiceHandoff />} />
         <Route path="recipes/:id/rating" element={<PostCookRating />} />
-        <Route path="pantry" element={<PantryManager />} />
+        <Route path="cook" element={<StartCooking />} />
+        <Route path="import" element={<ImportRecipe />} />
         <Route path="profile" element={<Profile />} />
-        <Route path="discover" element={<Discover />} />
-        <Route path="upload-recipe" element={<UploadRecipe />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

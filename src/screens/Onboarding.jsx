@@ -26,22 +26,14 @@ const QUICK_PANTRY = [
 
 export default function Onboarding() {
   const { completeOnboarding } = useApp();
-  const [step, setStep] = useState(0); // 0=welcome, 1=skill, 2=diet, 3=pantry
+  const [step, setStep] = useState(0); // 0=welcome, 1=skill, 2=diet
   const [skill, setSkill] = useState('');
   const [diet, setDiet] = useState('');
-  const [pantryPicks, setPantryPicks] = useState(new Set());
-
-  const togglePantry = (item) => setPantryPicks(prev => {
-    const next = new Set(prev);
-    next.has(item) ? next.delete(item) : next.add(item);
-    return next;
-  });
 
   const finish = () => {
     completeOnboarding({
       skillLevel: skill || 'Home cook',
       dietaryLifestyle: diet || 'None',
-      pantryItems: [...pantryPicks],
     });
   };
 
@@ -85,11 +77,11 @@ export default function Onboarding() {
     <div className="bg-bg min-h-full flex flex-col px-6 pt-12 pb-8">
       <div className="mb-2">
         <div className="flex gap-1 mb-6">
-          {[1,2,3].map(i => (
+          {[1,2].map(i => (
             <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= 1 ? 'bg-terra' : 'bg-s3'}`} />
           ))}
         </div>
-        <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 1 of 3</p>
+        <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 1 of 2</p>
         <h2 className="font-serif text-2xl font-bold text-t1 mb-2">What's your cooking level?</h2>
         <p className="text-t2 text-sm">Little Chef adjusts its guidance based on your experience.</p>
       </div>
@@ -136,11 +128,11 @@ export default function Onboarding() {
     <div className="bg-bg min-h-full flex flex-col px-6 pt-12 pb-8">
       <div className="mb-2">
         <div className="flex gap-1 mb-6">
-          {[1,2,3].map(i => (
+          {[1,2].map(i => (
             <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= 2 ? 'bg-terra' : 'bg-s3'}`} />
           ))}
         </div>
-        <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 2 of 3</p>
+        <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 2 of 2</p>
         <h2 className="font-serif text-2xl font-bold text-t1 mb-2">Any dietary preferences?</h2>
         <p className="text-t2 text-sm">Little Chef will filter and personalize every recipe to match.</p>
       </div>
@@ -162,57 +154,13 @@ export default function Onboarding() {
       </div>
 
       <button
-        onClick={() => setStep(3)}
+        onClick={finish}
         disabled={!diet}
         className="w-full bg-terra text-white rounded-2xl py-4 font-semibold text-base mt-6
           active:scale-95 transition-transform shadow-[0_0_20px_rgba(212,101,74,0.35)] disabled:opacity-40"
       >
-        Continue →
+        Let's cook! →
       </button>
-    </div>
-  );
-
-  // ── Step 3: Quick pantry ─────────────────────────────────
-  return (
-    <div className="bg-bg min-h-full flex flex-col px-6 pt-12 pb-8">
-      <div className="mb-2">
-        <div className="flex gap-1 mb-6">
-          {[1,2,3].map(i => (
-            <div key={i} className="flex-1 h-1 rounded-full bg-terra" />
-          ))}
-        </div>
-        <p className="text-t3 text-xs font-semibold uppercase tracking-wider mb-2">Step 3 of 3</p>
-        <h2 className="font-serif text-2xl font-bold text-t1 mb-2">What's in your kitchen?</h2>
-        <p className="text-t2 text-sm">Tap the staples you usually have. Little Chef will match recipes instantly.</p>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-6 flex-1 content-start">
-        {QUICK_PANTRY.map(item => (
-          <button
-            key={item}
-            onClick={() => togglePantry(item)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all duration-150 active:scale-95
-              ${pantryPicks.has(item)
-                ? 'bg-terra text-white border-terra shadow-[0_0_10px_rgba(212,101,74,0.3)]'
-                : 'bg-s1 text-t2 border-s3'}`}
-          >
-            {pantryPicks.has(item) ? '✓ ' : ''}{item}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-6">
-        <button
-          onClick={finish}
-          className="w-full bg-terra text-white rounded-2xl py-4 font-semibold text-base
-            active:scale-95 transition-transform shadow-[0_0_24px_rgba(212,101,74,0.4)] mb-3"
-        >
-          {pantryPicks.size > 0 ? `Let's cook! (${pantryPicks.size} items added)` : "Let's cook!"}
-        </button>
-        <button onClick={finish} className="w-full text-t3 text-xs py-1 active:text-t2">
-          Skip for now
-        </button>
-      </div>
     </div>
   );
 }

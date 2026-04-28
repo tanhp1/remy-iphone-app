@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { RECIPES, MY_RECIPES } from '../data/recipes';
-import { PANTRY_INITIAL } from '../data/pantry';
 
 const AppContext = createContext(null);
 
@@ -9,40 +8,22 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState({
     name: 'Alex',
     skillLevel: 'Home cook',
-    dietaryLifestyle: 'Keto',
-    favoriteCuisines: ['Asian', 'Italian', 'Mexican'],
-    timeBudget: 60,
+    dietaryLifestyle: 'None',
     isPro: true,
   });
 
-  const completeOnboarding = useCallback(({ skillLevel, dietaryLifestyle, pantryItems }) => {
+  const completeOnboarding = useCallback(({ skillLevel, dietaryLifestyle }) => {
     setUser(prev => ({ ...prev, skillLevel, dietaryLifestyle }));
-    if (pantryItems.length > 0) {
-      setPantry(prev => [
-        ...pantryItems.map((name, i) => ({
-          id: `onboard-${i}`, name, qty: '—', category: 'Pantry staples', expiringSoon: false,
-        })),
-        ...prev,
-      ]);
-    }
     setOnboardingComplete(true);
   }, []);
 
-  const [recipes, setRecipes] = useState(MY_RECIPES);
-  const allRecipes = RECIPES; // full list for detail/cook lookups
+  const [recipes] = useState(MY_RECIPES);
+  const allRecipes = RECIPES;
 
-  const [groceryList, setGroceryList] = useState([
-    { id: 'g1', name: 'Eggs',            qty: '1 dozen', checked: false },
-    { id: 'g2', name: 'Whole milk',       qty: '1 gallon', checked: false },
-    { id: 'g3', name: 'Cherry tomatoes',  qty: '1 pint',  checked: false },
-  ]);
-  const [pantry, setPantry] = useState(PANTRY_INITIAL);
   const [tweakedRecipes, setTweakedRecipes] = useState(new Set());
   const [recentlyCookedIds, setRecentlyCookedIds] = useState([]);
   const [servingsOverride, setServingsOverride] = useState({});
   const [toasts, setToasts] = useState([]);
-
-  // Sheet state — rendered at PhoneShell level
   const [sheet, setSheet] = useState({ open: false, title: '', content: null });
 
   const openSheet  = useCallback((title, content) => setSheet({ open: true, title, content }), []);
@@ -66,31 +47,8 @@ export function AppProvider({ children }) {
     setServingsOverride(prev => {
       const base = RECIPES.find(r => r.id === recipeId)?.servings ?? 4;
       const current = prev[recipeId] ?? base;
-      const next = Math.max(1, current + delta);
-      return { ...prev, [recipeId]: next };
+      return { ...prev, [recipeId]: Math.max(1, current + delta) };
     });
-  }, []);
-
-  const addPantryItems = useCallback((items) => {
-    setPantry(prev => [...items, ...prev]);
-  }, []);
-
-  const addGroceryItems = useCallback((items) => {
-    setGroceryList(prev => {
-      const existingNames = new Set(prev.map(i => i.name.toLowerCase()));
-      const newItems = items
-        .filter(i => !existingNames.has(i.name.toLowerCase()))
-        .map(i => ({ ...i, id: `grocery-${Date.now()}-${Math.random()}`, checked: false }));
-      return [...prev, ...newItems];
-    });
-  }, []);
-
-  const updateGroceryList = useCallback((updater) => {
-    setGroceryList(updater);
-  }, []);
-
-  const removePantryItem = useCallback((id) => {
-    setPantry(prev => prev.filter(p => p.id !== id));
   }, []);
 
   const value = {
@@ -99,7 +57,6 @@ export function AppProvider({ children }) {
     completeOnboarding,
     recipes,
     allRecipes,
-    pantry,
     tweakedRecipes,
     recentlyCookedIds,
     servingsOverride,
@@ -111,11 +68,6 @@ export function AppProvider({ children }) {
     applyTweak,
     markRecentlyCooked,
     updateServings,
-    addPantryItems,
-    removePantryItem,
-    groceryList,
-    addGroceryItems,
-    updateGroceryList,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -1,8 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { MY_RECIPES } from '../data/recipes';
-import { PANTRY_INITIAL } from '../data/pantry';
 
 function greeting() {
   const h = new Date().getHours();
@@ -11,24 +9,8 @@ function greeting() {
   return 'Good evening';
 }
 
-// Score each recipe by how many ingredients the pantry covers
-function getPantryMatches(recipes, pantry) {
-  const pantryNames = pantry.map(p => p.name.toLowerCase());
-  return recipes
-    .map(r => {
-      const matched = r.ingredients.filter(ing =>
-        pantryNames.some(p => p.includes(ing.item.toLowerCase()) || ing.item.toLowerCase().includes(p))
-      ).length;
-      const pct = Math.round((matched / r.ingredients.length) * 100);
-      return { ...r, pantryMatch: pct, pantryMatched: matched };
-    })
-    .sort((a, b) => b.pantryMatch - a.pantryMatch);
-}
-
-// ─── Voice button ───────────────────────────────────────────
 function VoiceButton() {
   const [listening, setListening] = useState(false);
-
   const toggle = () => setListening(v => !v);
 
   return (
@@ -71,205 +53,167 @@ function VoiceButton() {
   );
 }
 
-// ─── Start Cooking button ───────────────────────────────────
-function StartCookingButton({ recipes, pantry }) {
-  const navigate = useNavigate();
-  const pantryNames = pantry.map(p => p.name.toLowerCase());
-  const top = recipes
-    .map(r => {
-      const matched = r.ingredients.filter(ing =>
-        pantryNames.some(p => p.includes(ing.item.toLowerCase()) || ing.item.toLowerCase().includes(p))
-      ).length;
-      return { ...r, pct: Math.round((matched / r.ingredients.length) * 100) };
-    })
-    .sort((a, b) => b.pct - a.pct)[0];
-
-  const handlePress = () => {
-    if (top) navigate(`/recipes/${top.id}/cook`);
-    else navigate('/recipes');
-  };
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <button
-        onClick={handlePress}
-        className="w-16 h-16 rounded-full bg-s2 border-2 border-terra flex items-center justify-center
-          shadow-[0_0_16px_rgba(212,101,74,0.3)] active:scale-95 transition-all duration-200"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="#D4654A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-      </button>
-      <p className="text-xs font-semibold text-t3">Start cooking</p>
-    </div>
-  );
-}
-
-// ─── Recipe card (tall, pantry-aware) ──────────────────────
-function PantryRecipeCard({ recipe }) {
+function RecipeCard({ recipe }) {
   const navigate = useNavigate();
   return (
     <div
       onClick={() => navigate(`/recipes/${recipe.id}`)}
-      className="flex-shrink-0 w-[200px] bg-s1 border border-s3 rounded-3xl overflow-hidden
-        active:scale-95 transition-transform duration-100 cursor-pointer shadow-lg"
+      className="flex-shrink-0 w-[180px] bg-s1 border border-s3 rounded-2xl overflow-hidden
+        active:scale-95 transition-transform duration-100 cursor-pointer"
     >
-      {/* Color hero */}
-      <div className="h-44 flex items-center justify-center relative" style={{ backgroundColor: recipe.color }}>
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.55) 100%)' }} />
-        <span className="text-6xl drop-shadow-xl relative z-10">{recipe.emoji}</span>
-        {/* Pantry match badge */}
-        <div className="absolute bottom-3 left-3 right-3 z-10">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-white/80 text-[10px] font-semibold">
-              {recipe.pantryMatched}/{recipe.ingredients.length} in pantry
-            </span>
-            <span className="text-white text-[10px] font-bold">{recipe.pantryMatch}%</span>
-          </div>
-          <div className="h-1 bg-white/25 rounded-full overflow-hidden">
-            <div className="h-full bg-white rounded-full" style={{ width: `${recipe.pantryMatch}%` }} />
-          </div>
+      <div className="h-28 flex items-center justify-center relative" style={{ backgroundColor: recipe.color }}>
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)' }} />
+        <span className="text-5xl drop-shadow-lg relative z-10">{recipe.emoji}</span>
+        <div className="absolute bottom-2 left-2 right-2 z-10">
+          <p className="text-white font-bold text-xs leading-snug line-clamp-2">{recipe.title}</p>
         </div>
       </div>
-      {/* Body */}
-      <div className="p-3.5">
-        <p className="text-t1 font-bold text-sm leading-snug mb-1 line-clamp-2">{recipe.title}</p>
-        <p className="text-t3 text-xs mb-2">{recipe.cuisine} · {recipe.prepTime + recipe.cookTime} min</p>
-        <div className="flex flex-wrap gap-1">
-          {recipe.dietaryTags.slice(0, 1).map(t => (
-            <span key={t} className="bg-s2 text-t2 border border-s3 rounded-full px-2 py-0.5 text-[10px] font-medium">
-              {t}
-            </span>
-          ))}
-          <span className="bg-terra/15 text-terra border border-terra/25 rounded-full px-2 py-0.5 text-[10px] font-medium">
-            {recipe.difficulty}
-          </span>
-        </div>
+      <div className="p-2.5">
+        <p className="text-t3 text-[10px]">{recipe.prepTime + recipe.cookTime} min · {recipe.difficulty}</p>
       </div>
     </div>
   );
 }
 
-// ─── Main component ─────────────────────────────────────────
 export default function Home() {
-  const { user, pantry } = useApp();
-  const effectivePantry = pantry.length ? pantry : PANTRY_INITIAL;
-  const rankedRecipes = getPantryMatches(MY_RECIPES, effectivePantry);
+  const navigate = useNavigate();
+  const { user, allRecipes, recentlyCookedIds } = useApp();
   const scrollRef = useRef(null);
 
   const scroll = (dir) => {
-    const el = scrollRef.current;
-    if (el) el.scrollBy({ left: dir * 220, behavior: 'smooth' });
+    if (scrollRef.current) scrollRef.current.scrollBy({ left: dir * 200, behavior: 'smooth' });
   };
 
-  return (
-    <div className="bg-bg min-h-full flex flex-col relative overflow-hidden" style={{ minHeight: '100%' }}>
+  const recentRecipes = recentlyCookedIds.length > 0
+    ? recentlyCookedIds.map(id => allRecipes.find(r => r.id === id)).filter(Boolean)
+    : allRecipes.slice(0, 6);
 
-      {/* ── Top bar ── */}
+  const quickRecipes = allRecipes.filter(r => (r.prepTime + r.cookTime) <= 30).slice(0, 4);
+
+  return (
+    <div className="bg-bg min-h-full flex flex-col">
+
+      {/* Top bar */}
       <div className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3">
-        {/* Wordmark */}
         <div className="flex items-center gap-1.5">
           <span className="text-lg">👨‍🍳</span>
           <span className="font-serif text-t1 font-bold text-lg tracking-tight">Little Chef</span>
         </div>
-        {/* User avatar */}
         <div className="w-10 h-10 rounded-full bg-terra flex items-center justify-center
           shadow-[0_0_12px_rgba(212,101,74,0.35)]">
           <span className="text-white font-bold text-sm">{user.name[0]}</span>
         </div>
       </div>
 
-      {/* ── Greeting ── */}
+      {/* Greeting */}
       <div className="px-5 mb-5">
         <h1 className="font-serif text-2xl font-bold text-t1 leading-tight">
           {greeting()}, {user.name}
         </h1>
-        <p className="text-t2 text-sm mt-1">
-          Recipes matched to your pantry
-        </p>
+        <p className="text-t2 text-sm mt-1">Ready to cook something great?</p>
       </div>
 
-      {/* ── Pantry label ── */}
-      <div className="px-5 mb-3 flex items-center justify-between">
-        <p className="text-t3 text-xs font-semibold uppercase tracking-wider">
-          Based on your pantry
-        </p>
-        <span className="bg-s2 border border-s3 text-t2 text-[10px] font-bold px-2 py-0.5 rounded-full">
-          {effectivePantry.length} items
-        </span>
-      </div>
-
-      {/* ── Recipe cards (horizontal scroll) ── */}
-      <div className="flex-1 overflow-hidden relative">
-        <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-none px-5 pb-4 h-full items-start">
-          {rankedRecipes.map(r => (
-            <PantryRecipeCard key={r.id} recipe={r} />
-          ))}
-        </div>
-        {/* Left arrow */}
+      {/* Big Cook CTA */}
+      <div className="px-5 mb-5">
         <button
-          onClick={() => scroll(-1)}
-          className="absolute left-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full
-            bg-black/30 backdrop-blur-sm flex items-center justify-center
-            active:scale-90 transition-transform z-10"
+          onClick={() => navigate('/cook')}
+          className="w-full bg-terra rounded-2xl py-4 px-5 flex items-center justify-between
+            shadow-[0_0_28px_rgba(212,101,74,0.4)] active:scale-98 transition-transform"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-        {/* Right arrow */}
-        <button
-          onClick={() => scroll(1)}
-          className="absolute right-1 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full
-            bg-black/30 backdrop-blur-sm flex items-center justify-center
-            active:scale-90 transition-transform z-10"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
+          <div className="text-left">
+            <p className="text-white font-bold text-base">Start Cooking</p>
+            <p className="text-white/70 text-xs mt-0.5">Search or say what you want to make</p>
+          </div>
+          <div className="w-10 h-10 bg-white/15 rounded-xl flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="white" strokeWidth="2.2" strokeLinecap="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </div>
         </button>
       </div>
 
-      {/* ── Expiring soon nudge ── */}
-      {PANTRY_INITIAL.some(p => p.expiringSoon) && (
-        <div className="mx-5 mb-3 bg-[rgba(255,159,10,0.08)] border border-amber/25 rounded-2xl px-4 py-3
-          flex items-center gap-3">
-          <span className="text-amber text-base flex-shrink-0">⚠️</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-amber text-xs font-bold">Items expiring soon</p>
-            <p className="text-t2 text-xs mt-0.5 truncate">
-              {PANTRY_INITIAL.filter(p => p.expiringSoon).map(p => p.name).join(', ')}
-            </p>
+      {/* Quick meals */}
+      {quickRecipes.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between px-5 mb-3">
+            <p className="text-t3 text-xs font-semibold uppercase tracking-wider">⚡ Quick meals</p>
+            <button onClick={() => navigate('/cook')} className="text-terra text-xs font-semibold active:opacity-70">
+              See all
+            </button>
+          </div>
+          <div className="relative overflow-hidden">
+            <div ref={scrollRef} className="flex gap-3 overflow-x-auto scrollbar-none px-5">
+              {quickRecipes.map(r => <RecipeCard key={r.id} recipe={r} />)}
+            </div>
+            <button onClick={() => scroll(-1)}
+              className="absolute left-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 backdrop-blur-sm
+                flex items-center justify-center active:scale-90 transition-transform z-10">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <button onClick={() => scroll(1)}
+              className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/30 backdrop-blur-sm
+                flex items-center justify-center active:scale-90 transition-transform z-10">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
           </div>
         </div>
       )}
 
-      {/* ── Action buttons ── */}
-      <div className="flex-shrink-0 mx-5 mb-5">
-        <div className="flex items-stretch gap-4">
-          {/* Start Cooking — primary */}
-          <div className="flex-[2] flex flex-col items-center gap-2">
-            <StartCookingButton recipes={rankedRecipes} pantry={effectivePantry} />
-            <div className="text-center">
-              <p className="text-t1 text-xs font-semibold">Start Cooking</p>
-              <p className="text-t3 text-[10px] mt-0.5">Jump into your best match</p>
-            </div>
-          </div>
+      {/* Recent / Library */}
+      <div className="px-5 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-t3 text-xs font-semibold uppercase tracking-wider">
+            {recentlyCookedIds.length > 0 ? '🕐 Recently cooked' : '📖 Your library'}
+          </p>
+          <button onClick={() => navigate('/recipes')} className="text-terra text-xs font-semibold active:opacity-70">
+            See all
+          </button>
+        </div>
+        <div className="flex flex-col gap-2">
+          {recentRecipes.slice(0, 3).map(r => (
+            <button
+              key={r.id}
+              onClick={() => navigate(`/recipes/${r.id}`)}
+              className="flex items-center gap-3 bg-s1 border border-s3 rounded-xl p-3 active:bg-s2 transition-colors text-left"
+            >
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: r.color }}>
+                <span className="text-xl">{r.emoji}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-t1 font-semibold text-sm truncate">{r.title}</p>
+                <p className="text-t3 text-xs">{r.prepTime + r.cookTime} min · {r.cuisine}</p>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6D6D72" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          ))}
+        </div>
+      </div>
 
-          {/* Divider */}
-          <div className="w-px bg-s3 self-stretch my-2" />
-
-          {/* Voice — secondary */}
-          <div className="flex-[2] flex flex-col items-center gap-2">
-            <VoiceButton />
-            <div className="text-center">
-              <p className="text-t1 text-xs font-semibold">Ask Little Chef</p>
-              <p className="text-t3 text-[10px] mt-0.5">Hands-free AI assistant</p>
-            </div>
+      {/* Ask Little Chef */}
+      <div className="flex-shrink-0 px-5 mb-5">
+        <div className="bg-s1 border border-s3 rounded-2xl p-4 flex items-center gap-4">
+          <VoiceButton />
+          <div className="w-px self-stretch bg-s3" />
+          <div className="flex-1">
+            <p className="text-t1 text-sm font-semibold">Ask Little Chef</p>
+            <p className="text-t3 text-[10px] mt-0.5 leading-snug">
+              "What can I make in 20 minutes?" · "How do I deglaze a pan?"
+            </p>
           </div>
         </div>
       </div>
+
     </div>
   );
 }
