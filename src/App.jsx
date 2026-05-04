@@ -6,12 +6,9 @@ import Home from './screens/Home';
 import RecipeLibrary from './screens/RecipeLibrary';
 import RecipeDetail from './screens/RecipeDetail';
 import CookingMode from './screens/CookingMode';
-import VoiceHandoff from './screens/VoiceHandoff';
 import PostCookRating from './screens/PostCookRating';
-import StartCooking from './screens/StartCooking';
 import ImportRecipe from './screens/ImportRecipe';
 import Profile from './screens/Profile';
-import Subscription from './screens/Subscription';
 
 function AppRoutes() {
   const { onboardingComplete } = useApp();
@@ -48,12 +45,9 @@ function AppRoutes() {
         <Route path="recipes" element={<RecipeLibrary />} />
         <Route path="recipes/:id" element={<RecipeDetail />} />
         <Route path="recipes/:id/cook" element={<CookingMode />} />
-        <Route path="recipes/:id/voice" element={<VoiceHandoff />} />
         <Route path="recipes/:id/rating" element={<PostCookRating />} />
-        <Route path="cook" element={<StartCooking />} />
         <Route path="import" element={<ImportRecipe />} />
         <Route path="profile" element={<Profile />} />
-        <Route path="subscription" element={<Subscription />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

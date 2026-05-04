@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const HIDDEN_ON = ['/cook/', '/voice', '/rating'];
+const HIDDEN_ON = ['/cook', '/voice', '/rating'];
 
 const tabs = [
   {
@@ -20,16 +20,6 @@ const tabs = [
         stroke={active ? '#D4654A' : '#6D6D72'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'cook', label: 'Cook', path: '/cook',
-    icon: (active) => (
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-        stroke={active ? '#D4654A' : '#6D6D72'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <polygon points="10 8 16 12 10 16 10 8" fill={active ? '#D4654A' : 'none'} stroke={active ? '#D4654A' : '#6D6D72'}/>
       </svg>
     ),
   },

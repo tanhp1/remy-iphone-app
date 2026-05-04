@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
@@ -45,7 +46,11 @@ function scaleQty(qtyStr, ratio) {
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { allRecipes, user, tweakedRecipes, servingsOverride, updateServings, applyTweak, addToast } = useApp();
+  const { allRecipes, servingsOverride, updateServings, addToast } = useApp();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editPrompt, setEditPrompt] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [editDone, setEditDone] = useState(false);
 
   const recipe = allRecipes.find(r => r.id === id);
 
@@ -55,16 +60,25 @@ export default function RecipeDetail() {
     </div>
   );
 
-  const isTweaked = tweakedRecipes.has(id);
   const servings = servingsOverride[id] ?? recipe.servings;
   const ratio = servings / recipe.servings;
 
-  const handleApplyTweak = () => {
-    applyTweak(id);
-    addToast('Little Chef added chili flakes and updated step 3', 'success');
+  const handleAIEdit = () => {
+    if (!editPrompt.trim()) return;
+    setEditLoading(true);
+    setTimeout(() => {
+      setEditLoading(false);
+      setEditDone(true);
+      setTimeout(() => {
+        setEditOpen(false);
+        setEditDone(false);
+        setEditPrompt('');
+        addToast('Recipe updated by Little Chef ✨', 'success');
+      }, 800);
+    }, 1600);
   };
 
-  const stepText = (step) => user.skillLevel === 'Beginner' ? step.beginner : step.beginner;
+  const stepText = (step) => step.beginner;
 
   return (
     <div className="bg-bg min-h-full pb-6">
@@ -78,16 +92,11 @@ export default function RecipeDetail() {
 
         {/* Top-right action pills */}
         <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-          {recipe.isChefRecipe && (
-            <div className="flex items-center gap-1 bg-terra text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full">
-              <span>👨‍🍳</span> Chef's
-            </div>
-          )}
           <button
-            onClick={handleApplyTweak}
+            onClick={() => setEditOpen(true)}
             className="flex items-center gap-1 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full active:scale-90 transition-transform"
           >
-            ✨ Tweak
+            ✏️ Edit
           </button>
           <button
             onClick={() => navigate(`/recipes/${id}/cook`)}
@@ -167,38 +176,17 @@ export default function RecipeDetail() {
           Ingredients · {servings} servings
         </p>
         <div className="flex flex-col gap-2">
-          {recipe.ingredients.map((ing, i) => {
-            const showNew = ing.isNew && isTweaked;
-            const hidden = ing.isNew && !isTweaked;
-            if (hidden) return null;
-            return (
-              <div
-                key={i}
-                className={`bg-s1 border rounded-xl px-4 py-3 flex items-center gap-3
-                  ${showNew ? 'border-amber/40' : 'border-s3'}
-                  ${showNew ? 'animate-fade-in' : ''}`}
-              >
-                {showNew && <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber rounded-l-xl" />}
-                <div className={`w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center
-                  ${ing.inPantry ? 'bg-sage' : 'border-2 border-s3'}`}>
-                  {ing.inPantry && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-                      <polyline points="1 4 3.5 6.5 9 1"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="flex-1">
-                  <span className={`text-sm font-medium ${ing.inPantry ? 'text-t1' : 'text-t3'}`}>
-                    {scaleQty(ing.qty, ratio)} {ing.unit} {ing.item}
-                  </span>
-                  {showNew && <p className="text-amber text-[10px] font-semibold mt-0.5">Added by Little Chef ✨</p>}
-                </div>
-                {!ing.inPantry && !showNew && (
-                  <span className="text-terra text-xs font-medium">+ Add</span>
-                )}
-              </div>
-            );
-          })}
+          {recipe.ingredients.map((ing, i) => (
+            <div
+              key={i}
+              className="bg-s1 border border-s3 rounded-xl px-4 py-3 flex items-center gap-3"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-terra/50 flex-shrink-0" />
+              <span className="text-t1 text-sm font-medium flex-1">
+                {scaleQty(ing.qty, ratio)} {ing.unit} {ing.item}
+              </span>
+            </div>
+          ))}
         </div>
 
       </div>
@@ -213,11 +201,6 @@ export default function RecipeDetail() {
                 <span className="font-serif text-terra font-bold text-base">{step.number}</span>
               </div>
               <div className="flex-1 pt-0.5">
-                {step.isTweaked && isTweaked && (
-                  <div className="bg-[rgba(255,159,10,0.12)] border border-amber/25 rounded-lg px-3 py-2 mb-2">
-                    <p className="text-amber text-xs font-semibold">✨ Tweaked by Little Chef — chili flakes added for heat</p>
-                  </div>
-                )}
                 <p className="text-t1 text-base leading-relaxed">{stepText(step)}</p>
                 {step.timerSeconds && (
                   <span className="inline-flex items-center gap-1 mt-1.5 bg-terra/15 text-terra border border-terra/25 rounded-full px-2.5 py-1 text-xs font-semibold">
@@ -238,6 +221,44 @@ export default function RecipeDetail() {
       </div>
 
 
+      {/* AI Edit sheet */}
+      {editOpen && (
+        <div className="absolute inset-0 z-50 bg-black/60 flex items-end">
+          <div className="bg-s1 border-t border-s3 rounded-t-3xl w-full px-5 pt-5 pb-8 animate-fade-in">
+            <div className="w-10 h-1 bg-s3 rounded-full mx-auto mb-5" />
+            <p className="text-t1 font-bold text-base mb-1">Edit with Little Chef ✨</p>
+            <p className="text-t3 text-xs mb-4">Describe what you'd like to change — add a note, swap an ingredient, adjust servings, simplify a step.</p>
+            <textarea
+              value={editPrompt}
+              onChange={e => setEditPrompt(e.target.value)}
+              placeholder={"e.g. 'Make it dairy-free'\ne.g. 'Add a note about substituting chicken'\ne.g. 'Simplify step 3 for beginners'"}
+              rows={3}
+              autoFocus
+              className="w-full bg-s2 border border-s3 rounded-xl px-4 py-3 text-t1 text-sm placeholder-t3 focus:border-terra outline-none resize-none mb-3"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setEditOpen(false); setEditPrompt(''); }}
+                className="flex-1 border border-s3 rounded-xl py-3 text-t2 text-sm font-medium active:bg-s2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAIEdit}
+                disabled={!editPrompt.trim() || editLoading}
+                className="flex-[2] bg-terra text-white rounded-xl py-3 text-sm font-semibold active:scale-95 transition-transform disabled:opacity-50"
+              >
+                {editDone ? '✓ Done!' : editLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Updating...
+                  </span>
+                ) : 'Apply edit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

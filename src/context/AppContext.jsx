@@ -1,33 +1,41 @@
 import { createContext, useContext, useState, useCallback } from 'react';
-import { RECIPES, MY_RECIPES } from '../data/recipes';
+import { RECIPES } from '../data/recipes';
 
 const AppContext = createContext(null);
 
+const DEFAULT_COOKBOOKS = [
+  {
+    id: 'cb1',
+    name: 'My Recipes',
+    emoji: '📖',
+    color: '#D4654A',
+    recipeIds: RECIPES.map(r => r.id),
+  },
+];
+
 export function AppProvider({ children }) {
   const [onboardingComplete, setOnboardingComplete] = useState(false);
-  const [user, setUser] = useState({
-    name: 'Alex',
-    skillLevel: 'Home cook',
-    dietaryLifestyle: 'None',
-    isPro: true,
-  });
+  const [user, setUser] = useState({ name: 'Alex' });
 
-  const completeOnboarding = useCallback(({ skillLevel, dietaryLifestyle }) => {
-    setUser(prev => ({ ...prev, skillLevel, dietaryLifestyle }));
+  // allRecipes is the master list; recipes can be added/edited over time
+  const [allRecipes, setAllRecipes] = useState(RECIPES);
+  const [cookbooks, setCookbooks] = useState(DEFAULT_COOKBOOKS);
+
+  const [servingsOverride, setServingsOverride] = useState({});
+  const [recentlyCookedIds, setRecentlyCookedIds] = useState([]);
+  const [toasts, setToasts] = useState([]);
+
+  const completeOnboarding = useCallback(({ name, firstCookbookName }) => {
+    setUser({ name: name || 'Chef' });
+    setCookbooks([{
+      id: 'cb1',
+      name: firstCookbookName || 'My Recipes',
+      emoji: '📖',
+      color: '#D4654A',
+      recipeIds: RECIPES.map(r => r.id),
+    }]);
     setOnboardingComplete(true);
   }, []);
-
-  const [recipes] = useState(MY_RECIPES);
-  const allRecipes = RECIPES;
-
-  const [tweakedRecipes, setTweakedRecipes] = useState(new Set());
-  const [recentlyCookedIds, setRecentlyCookedIds] = useState([]);
-  const [servingsOverride, setServingsOverride] = useState({});
-  const [toasts, setToasts] = useState([]);
-  const [sheet, setSheet] = useState({ open: false, title: '', content: null });
-
-  const openSheet  = useCallback((title, content) => setSheet({ open: true, title, content }), []);
-  const closeSheet = useCallback(() => setSheet({ open: false, title: '', content: null }), []);
 
   const addToast = useCallback((message, type = 'default') => {
     const id = Date.now();
@@ -35,8 +43,30 @@ export function AppProvider({ children }) {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2800);
   }, []);
 
-  const applyTweak = useCallback((recipeId) => {
-    setTweakedRecipes(prev => new Set([...prev, recipeId]));
+  // Add a new recipe and optionally assign it to a cookbook
+  const addRecipe = useCallback((recipe, cookbookId) => {
+    const newRecipe = { ...recipe, id: `r${Date.now()}`, source: 'Imported' };
+    setAllRecipes(prev => [newRecipe, ...prev]);
+    if (cookbookId) {
+      setCookbooks(prev => prev.map(cb =>
+        cb.id === cookbookId
+          ? { ...cb, recipeIds: [newRecipe.id, ...cb.recipeIds] }
+          : cb
+      ));
+    }
+    return newRecipe.id;
+  }, []);
+
+  // Update an existing recipe (AI edit, manual edit)
+  const updateRecipe = useCallback((recipeId, changes) => {
+    setAllRecipes(prev => prev.map(r => r.id === recipeId ? { ...r, ...changes } : r));
+  }, []);
+
+  // Create a new cookbook
+  const addCookbook = useCallback((name, emoji = '📖', color = '#D4654A') => {
+    const id = `cb${Date.now()}`;
+    setCookbooks(prev => [...prev, { id, name, emoji, color, recipeIds: [] }]);
+    return id;
   }, []);
 
   const markRecentlyCooked = useCallback((recipeId) => {
@@ -45,27 +75,25 @@ export function AppProvider({ children }) {
 
   const updateServings = useCallback((recipeId, delta) => {
     setServingsOverride(prev => {
-      const base = RECIPES.find(r => r.id === recipeId)?.servings ?? 4;
+      const base = allRecipes.find(r => r.id === recipeId)?.servings ?? 4;
       const current = prev[recipeId] ?? base;
       return { ...prev, [recipeId]: Math.max(1, current + delta) };
     });
-  }, []);
+  }, [allRecipes]);
 
   const value = {
     user,
     onboardingComplete,
     completeOnboarding,
-    recipes,
     allRecipes,
-    tweakedRecipes,
-    recentlyCookedIds,
+    cookbooks,
     servingsOverride,
+    recentlyCookedIds,
     toasts,
-    sheet,
-    openSheet,
-    closeSheet,
     addToast,
-    applyTweak,
+    addRecipe,
+    updateRecipe,
+    addCookbook,
     markRecentlyCooked,
     updateServings,
   };
